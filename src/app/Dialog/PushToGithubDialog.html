@@ -1,0 +1,25 @@
+<h1 mat-dialog-title>Select Question Tags</h1>
+<mat-radio-group
+  aria-labelledby="example-radio-group-label"
+  class="radioGroup"
+  [(ngModel)]="selectedTag"
+>
+  <mat-radio-button
+    class="example-radio-button"
+    *ngFor="let tag of data.data.question.topicTags"
+    [value]="tag.name"
+  >
+    {{tag.name}}
+  </mat-radio-button>
+</mat-radio-group>
+<mat-form-field>
+  <p>Type Custom Tag</p>
+  <input matInput [(ngModel)]="selectedTag" />
+</mat-form-field>
+<h3>Selected Tag : {{selectedTag}}</h3>
+<div mat-dialog-actions>
+  <button mat-raised-button (click)="pushToGit()">Push</button>
+  <button mat-raised-button cdkFocusInitial color="warn" (click)="onNoClick()">
+    Cancel
+  </button>
+</div>

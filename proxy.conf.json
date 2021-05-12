@@ -1,0 +1,20 @@
+{
+  "/api": {
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "secure": true,
+    "target": "https://leetcode.com"
+  },
+  "/graphql": {
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "secure": true,
+    "target": "https://leetcode.com"
+  },
+  "/list": {
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "secure": true,
+    "target": "https://leetcode.com"
+  }
+}
