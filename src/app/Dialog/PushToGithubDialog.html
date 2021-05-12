@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Select Question Tags</h1>
+<h4 mat-dialog-title>Select Question Tags</h4>
 <mat-radio-group
   aria-labelledby="example-radio-group-label"
   class="radioGroup"
@@ -6,20 +6,42 @@
 >
   <mat-radio-button
     class="example-radio-button"
-    *ngFor="let tag of data.data.question.topicTags"
+    *ngFor="let tag of data.tags.data.question.topicTags"
     [value]="tag.name"
   >
     {{tag.name}}
   </mat-radio-button>
 </mat-radio-group>
+
 <mat-form-field>
-  <p>Type Custom Tag</p>
+  <p>Custom Question Tag</p>
   <input matInput [(ngModel)]="selectedTag" />
 </mat-form-field>
-<h3>Selected Tag : {{selectedTag}}</h3>
+
+<h4 mat-dialog-title>Select Repository</h4>
+
+<mat-radio-group
+  aria-labelledby="example-radio-group-label"
+  class="radioGroup"
+  [(ngModel)]="selectedRepo"
+>
+  <mat-radio-button
+    class="example-radio-button"
+    *ngFor="let repo of data.user.repositories"
+    [value]="repo"
+  >
+    {{ repo }}
+  </mat-radio-button>
+</mat-radio-group>
+
+<h5>Selected Tag : {{selectedTag}}</h5>
+<h5>Selected Repository : {{selectedRepo}}</h5>
+
 <div mat-dialog-actions>
-  <button mat-raised-button (click)="pushToGit()">Push</button>
   <button mat-raised-button cdkFocusInitial color="warn" (click)="onNoClick()">
     Cancel
+  </button>
+  <button mat-raised-button style="float: right" (click)="pushToGit()">
+    Push
   </button>
 </div>

@@ -1,25 +1,25 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Info } from './Model/Info';
-import { combineLatest, forkJoin, Observable, of, pipe } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { FilteredInfo } from './Model/FilteredInfo';
-import { element } from 'protractor';
-import { Submissions, SubmissionsDump } from './Model/Submissions';
+import { SubmissionsDump } from './Model/Submissions';
 import { exit } from 'process';
-import { Question, QuestionTag } from './Model/QuestionTags';
+import { QuestionTag } from './Model/QuestionTags';
 import { MatDialog } from '@angular/material/dialog';
 import { PushToGithubComponent } from './Dialog/PushToGithubDialog';
+import { User } from './Model/User';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  title = 'LeetHub';
+  title = 'LeetCodeHub';
   info: Info;
+  gitUser: User;
   filteredInfo: FilteredInfo[] = [];
   defaultHeaders = new HttpHeaders();
   displayedColumns: string[] = [
@@ -45,6 +45,7 @@ export class AppComponent implements OnInit {
       'csrftoken',
       'wabTxR0Ce7QxnUASDaUJ6wcItnScijdLbTAd3xhRg4SdjGWCR2eBhwV1RKBaFPrU',
     );
+    this.__GetUser();
   }
 
   ngOnInit() {
@@ -168,7 +169,7 @@ export class AppComponent implements OnInit {
       operationName: 'getQuestionDetail',
     };
 
-    return this.httpClient.request('post', '/graphql' + slug, {
+    return this.httpClient.request('post', '/graphql/' + slug, {
       body,
       headers,
       withCredentials: true,
@@ -190,11 +191,59 @@ export class AppComponent implements OnInit {
 
   private _Open(id: number) {
     const dialogRef = this.dialog.open(PushToGithubComponent, {
-      width: '300px',
-      data: this.filteredInfo[id].questionTag,
+      width: '400px',
+      data: { tags: this.filteredInfo[id].questionTag, user: this.gitUser },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      console.log('The dialog was closed');
+      console.log(
+        result + '/' + this.filteredInfo[id].question__title_slug + '.java',
+      );
     });
+  }
+
+  private __GetUser() {
+    let headers = this.defaultHeaders;
+    headers = headers.set(
+      'Authorization',
+      'token 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',
+    );
+    headers = headers.set('Access-Control-Allow-Origin', '*');
+    this.httpClient
+      .request('get', '/user', {
+        headers,
+      })
+      .subscribe((x: any) => {
+        this.gitUser = {
+          id: undefined,
+          name: undefined,
+          owner: undefined,
+          repository_private: undefined,
+          repository_public: undefined,
+          repositories: [],
+        };
+        this.gitUser.id = x.id;
+        this.gitUser.name = x.name;
+        this.gitUser.owner = x.login;
+        this.gitUser.repository_private = x.total_private_repos;
+        this.gitUser.repository_public = x.public_repos;
+        this.__GetRepositories();
+      });
+  }
+  private __GetRepositories() {
+    let headers = this.defaultHeaders;
+    headers = headers.set(
+      'Authorization',
+      'token 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',
+    );
+    headers = headers.set('Access-Control-Allow-Origin', '*');
+    this.httpClient
+      .request('get', '/user/repos', {
+        headers,
+      })
+      .subscribe((x: any) => {
+        x.forEach((element) => {
+          this.gitUser.repositories.push(element.name);
+        });
+      });
   }
 }
