@@ -17,7 +17,9 @@ import { PushToGithubComponent } from './Dialog/PushToGithubDialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatRippleModule } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
 @NgModule({
   declarations: [AppComponent, PushToGithubComponent],
   imports: [
@@ -27,6 +29,7 @@ import { MatRadioModule } from '@angular/material/radio';
     HttpClientModule,
     MatDividerModule,
     MatTableModule,
+    MatToolbarModule,
     MatSortModule,
     MatFormFieldModule,
     ReactiveFormsModule,
@@ -37,6 +40,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatRippleModule,
     FormsModule,
     MatRadioModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

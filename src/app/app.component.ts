@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Info } from './Model/Info';
-import { Observable, of, pipe } from 'rxjs';
+import { combineLatest, forkJoin, Observable, of, pipe } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -29,6 +29,8 @@ export class AppComponent implements OnInit {
     'status',
   ];
   dataSource: any;
+  loading = true;
+
   @ViewChild(MatSort, { static: false }) sort: MatSort;
 
   constructor(
@@ -48,6 +50,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
+
     this.httpClient
       .request('get', '/api/problems/algorithms/', {
         headers,
@@ -69,6 +72,7 @@ export class AppComponent implements OnInit {
         });
 
         this.dataSource = new MatTableDataSource(this.filteredInfo);
+        this.loading = false;
         this.dataSource.sort = this.sort;
       });
   }
@@ -104,9 +108,17 @@ export class AppComponent implements OnInit {
     if (
       this.filteredInfo[solvedQuestion.internalId].submissions === undefined
     ) {
-      this.fetchSubmissionOfProblemWithTag(solvedQuestion.slug);
+      this.__FetchSubmissionsOfProblem(solvedQuestion.slug).subscribe(
+        (response: any) => {
+          this.filteredInfo[solvedQuestion.internalId].submissions = response;
+          this.__DownloadSubmission(
+            response.submissions_dump,
+            solvedQuestion.slug,
+          );
+        },
+      );
     } else {
-      this.downloadSubmission(
+      this.__DownloadSubmission(
         this.filteredInfo[solvedQuestion.internalId].submissions
           .submissions_dump,
         solvedQuestion.slug,
@@ -114,20 +126,16 @@ export class AppComponent implements OnInit {
     }
   }
 
-  public fetchSubmissionOfProblemWithTag(slug: string) {
+  private __FetchSubmissionsOfProblem(slug: string) {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
-    this.httpClient
-      .request('get', '/api/submissions/' + slug, {
-        headers,
-        withCredentials: true,
-      })
-      .subscribe((response: any) => {
-        this.downloadSubmission(response.submissions_dump, slug);
-      });
+    return this.httpClient.request('get', '/api/submissions/' + slug, {
+      headers,
+      withCredentials: true,
+    });
   }
 
-  private downloadSubmission(submissions: SubmissionsDump[], slug: string) {
+  private __DownloadSubmission(submissions: SubmissionsDump[], slug: string) {
     submissions.forEach((item) => {
       if (item.status_display === 'Accepted') {
         const bb = new Blob([item.code], { type: 'text/plain;' });
@@ -140,9 +148,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  public pushToGithub(filteredInfo: FilteredInfo) {}
-
-  private fetchQuestionTag(slug: string) {
+  private __FetchQuestionTag(slug: string) {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
     const body = {
@@ -171,7 +177,7 @@ export class AppComponent implements OnInit {
 
   openDialog(filteredInfo: FilteredInfo): void {
     if (filteredInfo.questionTag === undefined) {
-      this.fetchQuestionTag(filteredInfo.question__title_slug).subscribe(
+      this.__FetchQuestionTag(filteredInfo.question__title_slug).subscribe(
         (x: QuestionTag) => {
           this.filteredInfo[filteredInfo.internalId].questionTag = x;
           this._Open(filteredInfo.internalId);

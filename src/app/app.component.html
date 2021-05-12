@@ -1,73 +1,81 @@
-<br />
-<div *ngIf="info">
-  <table>
-    <tr>
-      <th>{{ info.user_name }}</th>
-      <th>{{ info.category_slug }}</th>
-      <th>{{ info.ac_easy }}</th>
-      <th>{{ info.ac_medium }}</th>
-      <th>{{ info.ac_hard }}</th>
-      <th>{{ info.num_solved }}</th>
-      <th>{{ info.num_total }}</th>
-    </tr>
+<mat-toolbar>
+  <p>LEETCODE HUB</p>
+  <p class="example-spacer"></p>
+  <button mat-button *ngIf="info" [matMenuTriggerFor]="menu">Menu</button>
+  <mat-menu #menu="matMenu">
+    <button *ngIf="info" mat-menu-item>{{ info.user_name }}</button>
+    <button *ngIf="info" mat-menu-item>EASY : {{ info.ac_easy }}</button>
+    <button *ngIf="info" mat-menu-item>MEDIUM : {{ info.ac_medium }}</button>
+    <button *ngIf="info" mat-menu-item>HARD : {{ info.ac_hard }}</button>
+  </mat-menu>
+</mat-toolbar>
+<div>
+  <button
+    mat-raised-button
+    style="float: right; margin: 10px 135px 10px"
+    color="primary"
+    (click)="downloadAllSolvedSolution()"
+  >
+    Download All Solved
+  </button>
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <ng-container matColumnDef="question_id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>
+      <td mat-cell *matCellDef="let element">{{ element.question_id }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="question__title">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+      <td
+        style="cursor: pointer"
+        mat-cell
+        *matCellDef="let element"
+        (click)="redirectToLeetCode(element)"
+      >
+        {{ element.question__title }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="level">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
+      <td mat-cell *matCellDef="let element">{{ element.level }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-icon *ngIf="element.status === 'Solved'">done</mat-icon>
+        <button
+          *ngIf="element.status === 'Solved'"
+          mat-icon-button
+          style="float: right; margin: 5px"
+          (click)="
+            downloadSpecificSolution({
+              internalId: element.internalId,
+              slug: element.question__title_slug
+            })
+          "
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+        <button
+          *ngIf="element.status === 'Solved'"
+          mat-icon-button
+          style="float: right; margin: 5px"
+          (click)="openDialog(element)"
+        >
+          <mat-icon>source</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
-  <br />
 </div>
-
-<button
-  mat-raised-button
-  style="float: right; margin-right: 135px; margin-bottom: 10px"
-  color="primary"
-  (click)="downloadAllSolvedSolution()"
->
-  Download Solved
-</button>
-<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-  <ng-container matColumnDef="question_id">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>
-    <td mat-cell *matCellDef="let element">{{ element.question_id }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="question__title">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
-    <td
-      style="cursor: pointer"
-      mat-cell
-      *matCellDef="let element"
-      (click)="redirectToLeetCode(element)"
-    >
-      {{ element.question__title }}
-    </td>
-  </ng-container>
-
-  <ng-container matColumnDef="level">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
-    <td mat-cell *matCellDef="let element">{{ element.level }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="status">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-    <td mat-cell *matCellDef="let element">
-      <mat-icon *ngIf="element.status === 'Solved'">done</mat-icon>
-      <button
-        *ngIf="element.status === 'Solved'"
-        mat-icon-button
-        style="float: right; margin: 5px"
-        (click)="downloadSpecificSolution(element.question__title_slug)"
-      >
-        <mat-icon>download</mat-icon>
-      </button>
-      <button
-        *ngIf="element.status === 'Solved'"
-        mat-icon-button
-        style="float: right; margin: 5px"
-        (click)="openDialog(element)"
-      >
-        <mat-icon>Github</mat-icon>
-      </button>
-    </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-</table>
+<div *ngIf="loading">
+  <mat-spinner
+    style="margin: 0 auto; margin-top: 300px"
+    mode="indeterminate"
+  ></mat-spinner>
+</div>
