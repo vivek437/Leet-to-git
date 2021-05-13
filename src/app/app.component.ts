@@ -91,7 +91,8 @@ export class AppComponent implements OnInit {
           );
           this.__DownloadSubmission(
             solvedQuestion.internalId,
-            response.submissions_dump,
+            this.filteredInfo[solvedQuestion.internalId]
+              .latestSuccessfulSubmission,
             solvedQuestion.slug,
           );
         },
@@ -276,10 +277,7 @@ export class AppComponent implements OnInit {
 
   private __GetGitHubHeaders(): any {
     let headers = this.defaultHeaders;
-    headers = headers.set(
-      'Authorization',
-      'token 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',
-    );
+    headers = headers.set('Authorization', 'token sample_token ');
     headers = headers.set('Access-Control-Allow-Origin', '*');
     return headers;
   }

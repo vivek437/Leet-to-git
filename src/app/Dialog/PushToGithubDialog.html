@@ -1,47 +1,59 @@
-<h4 mat-dialog-title>Select Question Bucket</h4>
-<mat-radio-group
-  aria-labelledby="example-radio-group-label"
-  class="radioGroup"
-  [(ngModel)]="selectedBucket"
->
-  <mat-radio-button
-    class="example-radio-button"
-    *ngFor="let tag of data.tags.data.question.topicTags"
-    [value]="tag.name"
+<h3 mat-dialog-title>PUSH TO GITHUB</h3>
+<mat-divider></mat-divider>
+<div style="padding: 10px">
+  <h4 mat-dialog-title>Select Question Bucket*</h4>
+  <mat-radio-group
+    aria-labelledby="radio-group-label"
+    class="radioGroup"
+    [(ngModel)]="selectedBucket"
   >
-    {{tag.name}}
-  </mat-radio-button>
-</mat-radio-group>
+    <mat-radio-button
+      class="radio-button"
+      *ngFor="let tag of data.tags.data.question.topicTags"
+      [value]="tag.name"
+    >
+      {{tag.name}}
+    </mat-radio-button>
+  </mat-radio-group>
 
-<mat-form-field>
-  <p>Custom Question Tag</p>
-  <input matInput [(ngModel)]="selectedBucket" />
-</mat-form-field>
+  <mat-form-field>
+    <p>Custom Question Tag</p>
+    <input matInput [(ngModel)]="selectedBucket" />
+  </mat-form-field>
+</div>
+<mat-divider></mat-divider>
 
-<h4 mat-dialog-title>Select Repository</h4>
-
-<mat-radio-group
-  aria-labelledby="example-radio-group-label"
-  class="radioGroup"
-  [(ngModel)]="selectedRepo"
->
-  <mat-radio-button
-    class="example-radio-button"
-    *ngFor="let repo of data.user.repositories"
-    [value]="repo"
+<div style="padding: 10px">
+  <h4 mat-dialog-title>Select Github Repository*</h4>
+  <mat-radio-group
+    aria-labelledby="radio-group-label"
+    class="radioGroup"
+    [(ngModel)]="selectedRepo"
   >
-    {{ repo }}
-  </mat-radio-button>
-</mat-radio-group>
-
-<h5>Selected Bucket : {{selectedBucket}}</h5>
-<h5>Selected Repository : {{selectedRepo}}</h5>
+    <mat-radio-button
+      class="radio-button"
+      *ngFor="let repo of data.user.repositories"
+      [value]="repo"
+    >
+      {{ repo }}
+    </mat-radio-button>
+  </mat-radio-group>
+</div>
+<mat-divider></mat-divider>
+<br />
+<p>Selected Bucket : {{selectedBucket}}</p>
+<p>Selected Repository : {{selectedRepo}}</p>
 
 <div mat-dialog-actions>
   <button mat-raised-button cdkFocusInitial color="warn" (click)="onNoClick()">
     Cancel
   </button>
-  <button mat-raised-button style="float: right" (click)="pushToGit()">
+  <button
+    mat-raised-button
+    style="float: right"
+    (click)="pushToGit()"
+    [disabled]="selectedRepo === undefined || selectedBucket === undefined || selectedBucket === ''"
+  >
     Push
   </button>
 </div>
