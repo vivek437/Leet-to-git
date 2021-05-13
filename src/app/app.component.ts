@@ -130,8 +130,8 @@ export class AppComponent implements OnInit {
         });
 
         this.dataSource = new MatTableDataSource(this.filteredInfo);
-        this.loading = false;
         this.dataSource.sort = this.sort;
+        this.loading = false;
       });
   }
 
@@ -277,8 +277,16 @@ export class AppComponent implements OnInit {
 
   private __GetGitHubHeaders(): any {
     let headers = this.defaultHeaders;
-    headers = headers.set('Authorization', 'token sample_token ');
+    headers = headers.set(
+      'Authorization',
+      'token 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',
+    );
     headers = headers.set('Access-Control-Allow-Origin', '*');
     return headers;
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 }

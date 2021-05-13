@@ -25,6 +25,7 @@
     <button *ngIf="info" mat-menu-item>HARD : {{ info.ac_hard }}</button>
   </mat-menu>
 </mat-toolbar>
+
 <div>
   <button
     mat-raised-button
@@ -34,6 +35,17 @@
   >
     Download All Solved
   </button>
+
+  <mat-form-field style="margin: 10px 40px 10px 40px">
+    <mat-label>Filter</mat-label>
+    <input
+      matInput
+      (keyup)="applyFilter($event)"
+      placeholder="Create a tree"
+      #input
+    />
+  </mat-form-field>
+
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
     <ng-container matColumnDef="question_id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>
@@ -48,7 +60,7 @@
         *matCellDef="let element"
         (click)="redirectToLeetCode(element)"
       >
-        {{ element.question__title }}
+        <u> {{ element.question__title }}</u>
       </td>
     </ng-container>
 
@@ -72,7 +84,7 @@
             })
           "
         >
-          <mat-icon>download</mat-icon>
+          <mat-icon>file_download</mat-icon>
         </button>
         <button
           *ngIf="element.status === 'Solved'"
@@ -80,13 +92,19 @@
           style="float: right; margin: 5px"
           (click)="openDialog(element)"
         >
-          <mat-icon>upload</mat-icon>
+          <mat-icon>cloud_upload</mat-icon>
         </button>
       </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="4">
+        No data matching the filter "{{ input.value }}"
+      </td>
+    </tr>
   </table>
 </div>
 <div *ngIf="loading">
