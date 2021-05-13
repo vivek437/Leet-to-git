@@ -1,1 +1,27 @@
-<p>setup-component works!</p>
+<h1>ADD ACCOUNT</h1>
+
+<div>
+  <p>LEETCODE SESSION COOKIE</p>
+  <mat-form-field>
+    <input matInput [(ngModel)]="leetcodeSession" />
+  </mat-form-field>
+</div>
+<div>
+  <p>LEETCODE CSRF TOKEN</p>
+  <mat-form-field>
+    <input matInput [(ngModel)]="csrftoken" />
+  </mat-form-field>
+</div>
+<div>
+  <p>GITHUB PAT</p>
+  <mat-form-field>
+    <input matInput [(ngModel)]="gitpat" />
+  </mat-form-field>
+</div>
+<button
+  mat-raised-button
+  [disabled]="csrftoken === '' || gitpat === '' || leetcodeSession === ''"
+  (click)="onClose()"
+>
+  Save
+</button>

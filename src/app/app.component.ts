@@ -10,6 +10,7 @@ import { QuestionTag } from './Model/QuestionTags';
 import { MatDialog } from '@angular/material/dialog';
 import { PushToGithubComponent } from './Dialog/PushToGithubDialog';
 import { User } from './Model/User';
+import { SetupComponent } from './setup-component/setup-component.component';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -36,19 +37,25 @@ export class AppComponent implements OnInit {
     public httpClient: HttpClient,
     private cookieService: CookieService,
     public dialog: MatDialog,
-  ) {
-    const sessionCookie =
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfYXV0aF91c2VyX2lkIjoiMTExMTY1OCIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImFsbGF1dGguYWNjb3VudC5hdXRoX2JhY2tlbmRzLkF1dGhlbnRpY2F0aW9uQmFja2VuZCIsIl9hdXRoX3VzZXJfaGFzaCI6ImE4NDMwODI5MGM1YTIxNjYwNDRhMDUzNzNiOGRlODA2NGVhMjQ2MjQiLCJpZCI6MTExMTY1OCwiZW1haWwiOiJ2aXZla3ByYXNhZDM0NUBnbWFpbC5jb20iLCJ1c2VybmFtZSI6InZpdmVrcHJhc2FkMzQ1IiwidXNlcl9zbHVnIjoidml2ZWtwcmFzYWQzNDUiLCJhdmF0YXIiOiJodHRwczovL2Fzc2V0cy5sZWV0Y29kZS5jb20vdXNlcnMvdml2ZWtwcmFzYWQzNDUvYXZhdGFyXzE1MzY5MTUwNzIucG5nIiwicmVmcmVzaGVkX2F0IjoxNjIwNjc5MjA5LCJpcCI6IjE4NS4yMjEuNjkuNDciLCJpZGVudGl0eSI6IjcyNzY2YWIyYjFjODVhZjk4YWRiYmI5NjgzNjAwZmRmIiwic2Vzc2lvbl9pZCI6NzM3ODAwN30.MVeNKzk7rkmsmsuW2QrMa8TPAyUdpVsRw6yp4BERkMA';
-    this.cookieService.set('LEETCODE_SESSION', sessionCookie);
-    this.cookieService.set(
-      'csrftoken',
-      'wabTxR0Ce7QxnUASDaUJ6wcItnScijdLbTAd3xhRg4SdjGWCR2eBhwV1RKBaFPrU',
-    );
-    this.__GetUser();
-  }
+  ) {}
 
   ngOnInit() {
-    this.__GetAllQuestion();
+    const session = this.cookieService.get('LEETCODE_SESSION');
+    const csrftoken = this.cookieService.get('csrftoken');
+    const gitpat = this.cookieService.get('git_pat');
+    if (csrftoken === '' || session === '' || gitpat === '') {
+      const dialogRef = this.dialog.open(SetupComponent, {
+        width: '700px',
+        data: {},
+      });
+      dialogRef.afterClosed().subscribe((result) => {
+        this.__GetUser();
+        this.__GetAllQuestion();
+      });
+    } else {
+      this.__GetUser();
+      this.__GetAllQuestion();
+    }
   }
 
   redirectToLeetCode(filteredInfo: FilteredInfo) {
@@ -235,9 +242,7 @@ export class AppComponent implements OnInit {
 
         headers: this.__GetGitHubHeaders(),
       })
-      .subscribe((x: any) => {
-        console.log('pushed to github');
-      });
+      .subscribe((x: any) => {});
   }
 
   private __GetUser() {
@@ -277,10 +282,8 @@ export class AppComponent implements OnInit {
 
   private __GetGitHubHeaders(): any {
     let headers = this.defaultHeaders;
-    headers = headers.set(
-      'Authorization',
-      'token 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',
-    );
+    const token = this.cookieService.get('git_pat');
+    headers = headers.set('Authorization', 'token ' + token);
     headers = headers.set('Access-Control-Allow-Origin', '*');
     return headers;
   }

@@ -12,15 +12,13 @@ export class PushToGithubComponent {
     public httpClient: HttpClient,
     public dialogRef: MatDialogRef<PushToGithubComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {
-    console.log(data);
-  }
+  ) {}
 
   defaultHeaders = new HttpHeaders();
   selectedBucket: string = undefined;
   selectedRepo: string = undefined;
 
-  onNoClick(): void {
+  onClose(): void {
     this.dialogRef.close(undefined);
   }
 

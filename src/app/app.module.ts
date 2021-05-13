@@ -20,9 +20,9 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { SetupComponentComponent } from './setup-component/setup-component.component';
+import { SetupComponent } from './setup-component/setup-component.component';
 @NgModule({
-  declarations: [AppComponent, PushToGithubComponent, SetupComponentComponent],
+  declarations: [AppComponent, PushToGithubComponent, SetupComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
