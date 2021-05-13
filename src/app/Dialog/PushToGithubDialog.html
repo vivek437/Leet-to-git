@@ -1,8 +1,8 @@
-<h4 mat-dialog-title>Select Question Tags</h4>
+<h4 mat-dialog-title>Select Question Bucket</h4>
 <mat-radio-group
   aria-labelledby="example-radio-group-label"
   class="radioGroup"
-  [(ngModel)]="selectedTag"
+  [(ngModel)]="selectedBucket"
 >
   <mat-radio-button
     class="example-radio-button"
@@ -15,7 +15,7 @@
 
 <mat-form-field>
   <p>Custom Question Tag</p>
-  <input matInput [(ngModel)]="selectedTag" />
+  <input matInput [(ngModel)]="selectedBucket" />
 </mat-form-field>
 
 <h4 mat-dialog-title>Select Repository</h4>
@@ -34,7 +34,7 @@
   </mat-radio-button>
 </mat-radio-group>
 
-<h5>Selected Tag : {{selectedTag}}</h5>
+<h5>Selected Bucket : {{selectedBucket}}</h5>
 <h5>Selected Repository : {{selectedRepo}}</h5>
 
 <div mat-dialog-actions>

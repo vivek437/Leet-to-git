@@ -6,7 +6,6 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { FilteredInfo } from './Model/FilteredInfo';
 import { SubmissionsDump } from './Model/Submissions';
-import { exit } from 'process';
 import { QuestionTag } from './Model/QuestionTags';
 import { MatDialog } from '@angular/material/dialog';
 import { PushToGithubComponent } from './Dialog/PushToGithubDialog';
@@ -49,9 +48,66 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.__GetAllQuestion();
+  }
+
+  redirectToLeetCode(filteredInfo: FilteredInfo) {
+    window.open(
+      'https://leetcode.com/problems/' + filteredInfo.question__title_slug,
+      '_blank',
+    );
+  }
+
+  public downloadAllSolvedSolution() {
+    const solvedQuestion = [];
+    this.filteredInfo.forEach((item) => {
+      if (item.status === 'Solved') {
+        solvedQuestion.push({
+          internalId: item.internalId,
+          slug: item.question__title_slug,
+        });
+      }
+    });
+
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < solvedQuestion.length; i++) {
+      setTimeout(() => {
+        this.downloadSpecificSolution(solvedQuestion[i]);
+      }, (i + 1) * 3000);
+    }
+  }
+
+  public downloadSpecificSolution(solvedQuestion: any) {
+    if (
+      this.filteredInfo[solvedQuestion.internalId]
+        .latestSuccessfulSubmission === undefined
+    ) {
+      this.__FetchSubmissionsOfProblem(solvedQuestion.slug).subscribe(
+        (response: any) => {
+          this.filteredInfo[solvedQuestion.internalId].submissions = response;
+          this.__UpdateLatestSubmission(
+            response.submissions_dump,
+            solvedQuestion.internalId,
+          );
+          this.__DownloadSubmission(
+            solvedQuestion.internalId,
+            response.submissions_dump,
+            solvedQuestion.slug,
+          );
+        },
+      );
+    } else {
+      this.__DownloadSubmission(
+        solvedQuestion.internalId,
+        this.filteredInfo[solvedQuestion.internalId].latestSuccessfulSubmission,
+        solvedQuestion.slug,
+      );
+    }
+  }
+
+  private __GetAllQuestion() {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
-
     this.httpClient
       .request('get', '/api/problems/algorithms/', {
         headers,
@@ -78,55 +134,6 @@ export class AppComponent implements OnInit {
       });
   }
 
-  redirectToLeetCode(filteredInfo: FilteredInfo) {
-    window.open(
-      'https://leetcode.com/problems/' + filteredInfo.question__title_slug,
-      '_blank',
-    );
-  }
-
-  public downloadAllSolvedSolution() {
-    const solvedQuestion = [];
-    this.filteredInfo.forEach((item) => {
-      if (item.status === 'Solved') {
-        solvedQuestion.push({
-          internalId: item.internalId,
-          slug: item.question__title_slug,
-        });
-      }
-    });
-
-    // tslint:disable-next-line:prefer-for-of
-    for (let i = 0; i < solvedQuestion.length; i++) {
-      setTimeout(() => {
-        this.downloadSpecificSolution(solvedQuestion[i]);
-        console.log('waited' + i);
-      }, (i + 1) * 3000);
-    }
-  }
-
-  public downloadSpecificSolution(solvedQuestion: any) {
-    if (
-      this.filteredInfo[solvedQuestion.internalId].submissions === undefined
-    ) {
-      this.__FetchSubmissionsOfProblem(solvedQuestion.slug).subscribe(
-        (response: any) => {
-          this.filteredInfo[solvedQuestion.internalId].submissions = response;
-          this.__DownloadSubmission(
-            response.submissions_dump,
-            solvedQuestion.slug,
-          );
-        },
-      );
-    } else {
-      this.__DownloadSubmission(
-        this.filteredInfo[solvedQuestion.internalId].submissions
-          .submissions_dump,
-        solvedQuestion.slug,
-      );
-    }
-  }
-
   private __FetchSubmissionsOfProblem(slug: string) {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
@@ -136,17 +143,24 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private __DownloadSubmission(submissions: SubmissionsDump[], slug: string) {
+  private __UpdateLatestSubmission(submissions: SubmissionsDump[], id: number) {
     submissions.forEach((item) => {
       if (item.status_display === 'Accepted') {
-        const bb = new Blob([item.code], { type: 'text/plain;' });
-        const a = document.createElement('a');
-        a.download = slug;
-        a.href = window.URL.createObjectURL(bb);
-        a.click();
-        exit;
+        this.filteredInfo[id].latestSuccessfulSubmission = item.code;
       }
     });
+  }
+
+  private __DownloadSubmission(
+    id: number,
+    latestSubmission: string,
+    slug: string,
+  ) {
+    const bb = new Blob([latestSubmission], { type: 'text/plain;' });
+    const a = document.createElement('a');
+    a.download = slug;
+    a.href = window.URL.createObjectURL(bb);
+    a.click();
   }
 
   private __FetchQuestionTag(slug: string) {
@@ -190,27 +204,45 @@ export class AppComponent implements OnInit {
   }
 
   private _Open(id: number) {
+    const slug = this.filteredInfo[id].question__title_slug;
     const dialogRef = this.dialog.open(PushToGithubComponent, {
       width: '400px',
       data: { tags: this.filteredInfo[id].questionTag, user: this.gitUser },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      console.log(
-        result + '/' + this.filteredInfo[id].question__title_slug + '.java',
-      );
+      if (result !== undefined) {
+        const url = result + '/' + slug + '.java';
+        if (this.filteredInfo[id].latestSuccessfulSubmission === undefined) {
+          this.__FetchSubmissionsOfProblem(slug).subscribe((response: any) => {
+            this.__UpdateLatestSubmission(response.submissions_dump, id);
+            this.__PushToGithub(url, id);
+          });
+        } else {
+          this.__PushToGithub(url, id);
+        }
+      }
     });
   }
 
+  private __PushToGithub(url: string, id: number) {
+    this.httpClient
+      .request('PUT', url, {
+        body: {
+          message: 'message',
+          content: btoa(this.filteredInfo[id].latestSuccessfulSubmission),
+        },
+
+        headers: this.__GetGitHubHeaders(),
+      })
+      .subscribe((x: any) => {
+        console.log('pushed to github');
+      });
+  }
+
   private __GetUser() {
-    let headers = this.defaultHeaders;
-    headers = headers.set(
-      'Authorization',
-      'token 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',
-    );
-    headers = headers.set('Access-Control-Allow-Origin', '*');
     this.httpClient
       .request('get', '/user', {
-        headers,
+        headers: this.__GetGitHubHeaders(),
       })
       .subscribe((x: any) => {
         this.gitUser = {
@@ -229,21 +261,26 @@ export class AppComponent implements OnInit {
         this.__GetRepositories();
       });
   }
+
   private __GetRepositories() {
-    let headers = this.defaultHeaders;
-    headers = headers.set(
-      'Authorization',
-      'token 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',
-    );
-    headers = headers.set('Access-Control-Allow-Origin', '*');
     this.httpClient
       .request('get', '/user/repos', {
-        headers,
+        headers: this.__GetGitHubHeaders(),
       })
       .subscribe((x: any) => {
         x.forEach((element) => {
           this.gitUser.repositories.push(element.name);
         });
       });
+  }
+
+  private __GetGitHubHeaders(): any {
+    let headers = this.defaultHeaders;
+    headers = headers.set(
+      'Authorization',
+      'token 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',
+    );
+    headers = headers.set('Access-Control-Allow-Origin', '*');
+    return headers;
   }
 }

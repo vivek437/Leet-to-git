@@ -17,11 +17,11 @@ export class PushToGithubComponent {
   }
 
   defaultHeaders = new HttpHeaders();
-  selectedTag: string = undefined;
+  selectedBucket: string = undefined;
   selectedRepo: string = undefined;
 
   onNoClick(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(undefined);
   }
 
   pushToGit() {
@@ -30,8 +30,8 @@ export class PushToGithubComponent {
       this.data.user.owner +
       '/' +
       this.selectedRepo +
-      '/' +
-      this.selectedTag;
+      '/contents/' +
+      this.selectedBucket;
     this.dialogRef.close(url);
   }
 }

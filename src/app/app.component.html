@@ -1,9 +1,25 @@
 <mat-toolbar>
   <p>LEETCODE HUB</p>
   <p class="example-spacer"></p>
-  <button mat-button *ngIf="info" [matMenuTriggerFor]="menu">Menu</button>
-  <mat-menu #menu="matMenu">
-    <button *ngIf="info" mat-menu-item>{{ info.user_name }}</button>
+  <button mat-button *ngIf="info" [matMenuTriggerFor]="leetcode">
+    Leetcode Profile
+  </button>
+  <button mat-button *ngIf="info" [matMenuTriggerFor]="Github">
+    Github Profile
+  </button>
+  <mat-menu #Github="matMenu">
+    <button *ngIf="info" mat-menu-item>username: {{ gitUser.owner }}</button>
+    <button *ngIf="info" mat-menu-item>Id : {{ gitUser.id }}</button>
+    <button *ngIf="info" mat-menu-item>Name : {{ gitUser.name }}</button>
+    <button *ngIf="info" mat-menu-item>
+      Public Repo : {{ gitUser.repository_public }}
+    </button>
+    <button *ngIf="info" mat-menu-item>
+      Private Repo : {{ gitUser.repository_private }}
+    </button>
+  </mat-menu>
+  <mat-menu #leetcode="matMenu">
+    <button *ngIf="info" mat-menu-item>username: {{ info.user_name }}</button>
     <button *ngIf="info" mat-menu-item>EASY : {{ info.ac_easy }}</button>
     <button *ngIf="info" mat-menu-item>MEDIUM : {{ info.ac_medium }}</button>
     <button *ngIf="info" mat-menu-item>HARD : {{ info.ac_hard }}</button>

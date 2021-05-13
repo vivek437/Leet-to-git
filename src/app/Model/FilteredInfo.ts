@@ -9,4 +9,5 @@ export interface FilteredInfo {
   level: number;
   questionTag?: QuestionTag;
   submissions?: Submissions;
+  latestSuccessfulSubmission?: string;
 }
