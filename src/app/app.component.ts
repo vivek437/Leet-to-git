@@ -1,5 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+} from '@angular/common/http';
 import { Info } from './Model/Info';
 import { CookieService } from 'ngx-cookie-service';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,13 +15,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { PushToGithubComponent } from './Dialog/PushToGithubDialog';
 import { User } from './Model/User';
 import { SetupComponent } from './setup-component/setup-component.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { retry, delay } from 'rxjs/operators';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  title = 'LeetCodeHub';
+  title = 'LEET-TO-GIT';
   info: Info;
   gitUser: User;
   filteredInfo: FilteredInfo[] = [];
@@ -30,6 +36,7 @@ export class AppComponent implements OnInit {
   ];
   dataSource: any;
   loading = true;
+  INVALID_INFO = 'Invalid Github PAT or Invalid Leetcode Cookie';
 
   @ViewChild(MatSort, { static: false }) sort: MatSort;
 
@@ -37,6 +44,7 @@ export class AppComponent implements OnInit {
     public httpClient: HttpClient,
     private cookieService: CookieService,
     public dialog: MatDialog,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit() {
@@ -49,12 +57,12 @@ export class AppComponent implements OnInit {
         data: {},
       });
       dialogRef.afterClosed().subscribe((result) => {
-        this.__GetUser();
-        this.__GetAllQuestion();
+        this.__GetGithubUser();
+        this.__GetLeetCodeUserProfile();
       });
     } else {
-      this.__GetUser();
-      this.__GetAllQuestion();
+      this.__GetGithubUser();
+      this.__GetLeetCodeUserProfile();
     }
   }
 
@@ -89,31 +97,35 @@ export class AppComponent implements OnInit {
       this.filteredInfo[solvedQuestion.internalId]
         .latestSuccessfulSubmission === undefined
     ) {
-      this.__FetchSubmissionsOfProblem(solvedQuestion.slug).subscribe(
-        (response: any) => {
-          this.filteredInfo[solvedQuestion.internalId].submissions = response;
-          this.__UpdateLatestSubmission(
-            response.submissions_dump,
-            solvedQuestion.internalId,
-          );
-          this.__DownloadSubmission(
-            solvedQuestion.internalId,
-            this.filteredInfo[solvedQuestion.internalId]
-              .latestSuccessfulSubmission,
-            solvedQuestion.slug,
-          );
-        },
-      );
+      this.__FetchSubmissionsOfProblem(solvedQuestion.slug)
+        .pipe(
+          retry(3), // you retry 3 times
+          delay(5000), // each retry will start after 1 second,
+        )
+        .subscribe(
+          (response: any) => {
+            this.filteredInfo[solvedQuestion.internalId].submissions = response;
+            this.__UpdateLatestSubmission(
+              response.submissions_dump,
+              solvedQuestion.internalId,
+            );
+            this.__DownloadSubmission(
+              this.filteredInfo[solvedQuestion.internalId]
+                .latestSuccessfulSubmission,
+              solvedQuestion.slug,
+            );
+          },
+          (err: HttpErrorResponse) => {},
+        );
     } else {
       this.__DownloadSubmission(
-        solvedQuestion.internalId,
         this.filteredInfo[solvedQuestion.internalId].latestSuccessfulSubmission,
         solvedQuestion.slug,
       );
     }
   }
 
-  private __GetAllQuestion() {
+  private __GetLeetCodeUserProfile() {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
     this.httpClient
@@ -121,25 +133,34 @@ export class AppComponent implements OnInit {
         headers,
         withCredentials: true,
       })
-      .subscribe((response: any) => {
-        this.info = response;
-        let i = 0;
-        this.info.stat_status_pairs.forEach((item) => {
-          this.filteredInfo[i] = {
-            internalId: i,
-            question_id: item.stat.question_id,
-            question__title: item.stat.question__title,
-            question__title_slug: item.stat.question__title_slug,
-            status: item.status === 'ac' ? 'Solved' : 'Unsolved',
-            level: item.difficulty.level,
-          };
-          i++;
-        });
+      .subscribe(
+        (response: any) => {
+          if (response.user_name === '') {
+            this.__clearCookieAndRedirect(this.INVALID_INFO);
+          } else {
+            this.info = response;
+            let i = 0;
+            this.info.stat_status_pairs.forEach((item) => {
+              this.filteredInfo[i] = {
+                internalId: i,
+                question_id: item.stat.question_id,
+                question__title: item.stat.question__title,
+                question__title_slug: item.stat.question__title_slug,
+                status: item.status === 'ac' ? 'Solved' : 'Unsolved',
+                level: item.difficulty.level,
+              };
+              i++;
+            });
 
-        this.dataSource = new MatTableDataSource(this.filteredInfo);
-        this.dataSource.sort = this.sort;
-        this.loading = false;
-      });
+            this.dataSource = new MatTableDataSource(this.filteredInfo);
+            this.dataSource.sort = this.sort;
+            this.loading = false;
+          }
+        },
+        (err) => {
+          this.__clearCookieAndRedirect(this.INVALID_INFO);
+        },
+      );
   }
 
   private __FetchSubmissionsOfProblem(slug: string) {
@@ -159,11 +180,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private __DownloadSubmission(
-    id: number,
-    latestSubmission: string,
-    slug: string,
-  ) {
+  private __DownloadSubmission(latestSubmission: string, slug: string) {
     const bb = new Blob([latestSubmission], { type: 'text/plain;' });
     const a = document.createElement('a');
     a.download = slug;
@@ -217,55 +234,95 @@ export class AppComponent implements OnInit {
       width: '400px',
       data: { tags: this.filteredInfo[id].questionTag, user: this.gitUser },
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result !== undefined) {
-        const url = result + '/' + slug + '.java';
-        if (this.filteredInfo[id].latestSuccessfulSubmission === undefined) {
-          this.__FetchSubmissionsOfProblem(slug).subscribe((response: any) => {
-            this.__UpdateLatestSubmission(response.submissions_dump, id);
+    dialogRef.afterClosed().subscribe(
+      (result) => {
+        if (result !== undefined) {
+          const url = result + '/' + slug + '.java';
+          if (this.filteredInfo[id].latestSuccessfulSubmission === undefined) {
+            this.__FetchSubmissionsOfProblem(slug).subscribe(
+              (response: any) => {
+                this.__UpdateLatestSubmission(response.submissions_dump, id);
+                this.__PushToGithub(url, id);
+              },
+              (err) => {
+                this.__clearCookieAndRedirect(this.INVALID_INFO);
+              },
+            );
+          } else {
             this.__PushToGithub(url, id);
-          });
-        } else {
-          this.__PushToGithub(url, id);
+          }
         }
-      }
-    });
+      },
+      (err) => {
+        this.__clearCookieAndRedirect(this.INVALID_INFO);
+      },
+    );
   }
 
   private __PushToGithub(url: string, id: number) {
     this.httpClient
       .request('PUT', url, {
         body: {
-          message: 'message',
+          message: this.filteredInfo[id].question__title,
           content: btoa(this.filteredInfo[id].latestSuccessfulSubmission),
         },
 
         headers: this.__GetGitHubHeaders(),
       })
-      .subscribe((x: any) => {});
+      .subscribe(
+        (res: any) => {
+          this.__openSnackBar('Successful Pushed to Github');
+        },
+        (err: HttpErrorResponse) => {
+          if (err.status === 401 || err.status === 403) {
+            this.__clearCookieAndRedirect(this.INVALID_INFO);
+          } else if (err.status === 422) {
+            this.__openSnackBar('Github already contains this solution!!');
+          } else {
+            this.__openSnackBar('Internal Server Error!! Try Again Later!!');
+          }
+        },
+      );
   }
 
-  private __GetUser() {
+  private __openSnackBar(message: string) {
+    this.snackBar.open(message, '', {
+      duration: 3000,
+    });
+  }
+
+  private __GetGithubUser() {
     this.httpClient
       .request('get', '/user', {
         headers: this.__GetGitHubHeaders(),
       })
-      .subscribe((x: any) => {
-        this.gitUser = {
-          id: undefined,
-          name: undefined,
-          owner: undefined,
-          repository_private: undefined,
-          repository_public: undefined,
-          repositories: [],
-        };
-        this.gitUser.id = x.id;
-        this.gitUser.name = x.name;
-        this.gitUser.owner = x.login;
-        this.gitUser.repository_private = x.total_private_repos;
-        this.gitUser.repository_public = x.public_repos;
-        this.__GetRepositories();
-      });
+      .subscribe(
+        (x: any) => {
+          this.gitUser = {
+            id: undefined,
+            name: undefined,
+            owner: undefined,
+            repository_private: undefined,
+            repository_public: undefined,
+            repositories: [],
+          };
+          this.gitUser.id = x.id;
+          this.gitUser.name = x.name;
+          this.gitUser.owner = x.login;
+          this.gitUser.repository_private = x.total_private_repos;
+          this.gitUser.repository_public = x.public_repos;
+          this.__GetRepositories();
+        },
+        (err) => {
+          this.__clearCookieAndRedirect('message');
+        },
+      );
+  }
+
+  private __clearCookieAndRedirect(message: string) {
+    this.__openSnackBar(message);
+    this.cookieService.deleteAll();
+    window.location.reload();
   }
 
   private __GetRepositories() {
@@ -273,11 +330,16 @@ export class AppComponent implements OnInit {
       .request('get', '/user/repos', {
         headers: this.__GetGitHubHeaders(),
       })
-      .subscribe((x: any) => {
-        x.forEach((element) => {
-          this.gitUser.repositories.push(element.name);
-        });
-      });
+      .subscribe(
+        (res: any) => {
+          res.forEach((element) => {
+            this.gitUser.repositories.push(element.name);
+          });
+        },
+        (err) => {
+          this.__clearCookieAndRedirect(this.INVALID_INFO);
+        },
+      );
   }
 
   private __GetGitHubHeaders(): any {

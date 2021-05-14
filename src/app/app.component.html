@@ -1,5 +1,5 @@
-<mat-toolbar>
-  <p>LEETCODE HUB</p>
+<mat-toolbar color="warn">
+  <p>LEET-TO-GIT</p>
   <p class="spacer"></p>
   <button mat-button *ngIf="info" [matMenuTriggerFor]="leetcode">
     Leetcode Profile
@@ -8,7 +8,7 @@
     Github Profile
   </button>
   <mat-menu #Github="matMenu">
-    <button *ngIf="info" mat-menu-item>username: {{ gitUser.owner }}</button>
+    <button *ngIf="info" mat-menu-item>{{ gitUser.owner }}</button>
     <button *ngIf="info" mat-menu-item>Id : {{ gitUser.id }}</button>
     <button *ngIf="info" mat-menu-item>Name : {{ gitUser.name }}</button>
     <button *ngIf="info" mat-menu-item>
@@ -19,7 +19,7 @@
     </button>
   </mat-menu>
   <mat-menu #leetcode="matMenu">
-    <button *ngIf="info" mat-menu-item>username: {{ info.user_name }}</button>
+    <button *ngIf="info" mat-menu-item>{{ info.user_name }}</button>
     <button *ngIf="info" mat-menu-item>EASY : {{ info.ac_easy }}</button>
     <button *ngIf="info" mat-menu-item>MEDIUM : {{ info.ac_medium }}</button>
     <button *ngIf="info" mat-menu-item>HARD : {{ info.ac_hard }}</button>
@@ -30,7 +30,7 @@
   <button
     mat-raised-button
     style="float: right; margin: 10px 135px 10px"
-    color="primary"
+    color="accent"
     (click)="downloadAllSolvedSolution()"
   >
     Download All Solved
@@ -55,7 +55,7 @@
     <ng-container matColumnDef="question__title">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
       <td
-        style="cursor: pointer"
+        style="cursor: pointer; color: #2196f3"
         mat-cell
         *matCellDef="let element"
         (click)="redirectToLeetCode(element)"
@@ -66,17 +66,33 @@
 
     <ng-container matColumnDef="level">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
-      <td mat-cell *matCellDef="let element">{{ element.level }}</td>
+      <td
+        mat-cell
+        [ngClass]="
+          element.level === 1 ? 'easy' : element.level === 2 ? 'medium' : 'hard'
+        "
+        *matCellDef="let element"
+      >
+        {{
+          element.level === 1 ? 'Easy' : element.level === 2 ? 'Medium' : 'Hard'
+        }}
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="status">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
       <td mat-cell *matCellDef="let element">
-        <mat-icon *ngIf="element.status === 'Solved'">done</mat-icon>
+        <mat-icon
+          matTooltip="Solved!"
+          style="color: #1b5e20"
+          *ngIf="element.status === 'Solved'"
+          >done</mat-icon
+        >
         <button
           *ngIf="element.status === 'Solved'"
           mat-icon-button
-          style="float: right; margin: 5px"
+          matTooltip="Download Solution as file"
+          style="float: right; margin: 5px; color: '#81C784'"
           (click)="
             downloadSpecificSolution({
               internalId: element.internalId,
@@ -89,7 +105,8 @@
         <button
           *ngIf="element.status === 'Solved'"
           mat-icon-button
-          style="float: right; margin: 5px"
+          matTooltip="Upload Solution to Github"
+          style="float: right; margin: 5px; color: '#81D4FA'"
           (click)="openDialog(element)"
         >
           <mat-icon>cloud_upload</mat-icon>

@@ -21,6 +21,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { SetupComponent } from './setup-component/setup-component.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 @NgModule({
   declarations: [AppComponent, PushToGithubComponent, SetupComponent],
   imports: [
@@ -41,8 +43,10 @@ import { SetupComponent } from './setup-component/setup-component.component';
     MatRippleModule,
     FormsModule,
     MatRadioModule,
+    MatTooltipModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

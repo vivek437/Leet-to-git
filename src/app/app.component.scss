@@ -7,6 +7,10 @@ th.mat-sort-header-sorted {
   color: black;
 }
 
+th {
+  color: #5d4037;
+}
+
 .spacer {
   flex: 1 1 auto;
 }
@@ -14,4 +18,14 @@ th.mat-sort-header-sorted {
 .mat-form-field {
   font-size: 14px;
   width: 90%;
+}
+
+.easy {
+  color: #1b5e20;
+}
+.medium {
+  color: #ffa000;
+}
+.hard {
+  color: #dd2c00;
 }
