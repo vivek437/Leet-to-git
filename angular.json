@@ -1,9 +1,9 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "defaultProject": "LeetCodeHub",
+  "defaultProject": "Leet-To-Git",
   "newProjectRoot": "projects",
   "projects": {
-    "LeetCodeHub": {
+    "Leet-To-Git": {
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -42,7 +42,7 @@
             "assets": ["src/favicon.ico", "src/assets"],
             "index": "src/index.html",
             "main": "src/main.ts",
-            "outputPath": "dist/LeetCodeHub",
+            "outputPath": "dist/Leet-To-Git",
             "polyfills": "src/polyfills.ts",
             "scripts": [],
             "styles": [
@@ -56,18 +56,18 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "configurations": {
             "production": {
-              "devServerTarget": "LeetCodeHub:serve:production"
+              "devServerTarget": "Leet-To-Git:serve:production"
             }
           },
           "options": {
-            "devServerTarget": "LeetCodeHub:serve",
+            "devServerTarget": "Leet-To-Git:serve",
             "protractorConfig": "e2e/protractor.conf.js"
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "LeetCodeHub:build"
+            "browserTarget": "Leet-To-Git:build"
           }
         },
         "lint": {
@@ -85,11 +85,11 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "LeetCodeHub:build:production"
+              "browserTarget": "Leet-To-Git:build:production"
             }
           },
           "options": {
-            "browserTarget": "LeetCodeHub:build"
+            "browserTarget": "Leet-To-Git:build"
           }
         },
         "test": {

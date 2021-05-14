@@ -147,7 +147,12 @@ export class AppComponent implements OnInit {
                 question__title: item.stat.question__title,
                 question__title_slug: item.stat.question__title_slug,
                 status: item.status === 'ac' ? 'Solved' : 'Unsolved',
-                level: item.difficulty.level,
+                level:
+                  item.difficulty.level === 1
+                    ? 'Easy'
+                    : item.difficulty.level === 2
+                    ? 'Medium'
+                    : 'Hard',
               };
               i++;
             });

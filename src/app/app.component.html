@@ -41,7 +41,7 @@
     <input
       matInput
       (keyup)="applyFilter($event)"
-      placeholder="Create a tree"
+      placeholder="Type Something to filter on Id , Name , Level, Status ..."
       #input
     />
   </mat-form-field>
@@ -66,16 +66,8 @@
 
     <ng-container matColumnDef="level">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
-      <td
-        mat-cell
-        [ngClass]="
-          element.level === 1 ? 'easy' : element.level === 2 ? 'medium' : 'hard'
-        "
-        *matCellDef="let element"
-      >
-        {{
-          element.level === 1 ? 'Easy' : element.level === 2 ? 'Medium' : 'Hard'
-        }}
+      <td mat-cell [ngClass]="element.level" *matCellDef="let element">
+        {{ element.level }}
       </td>
     </ng-container>
 

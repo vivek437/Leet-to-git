@@ -6,7 +6,7 @@ export interface FilteredInfo {
   question__title: string;
   question__title_slug: string;
   status?: string;
-  level: number;
+  level: string;
   questionTag?: QuestionTag;
   submissions?: Submissions;
   latestSuccessfulSubmission?: string;

@@ -21,7 +21,7 @@ describe('AppComponent', () => {
   it(`should have as title 'LEET-TO-GIT'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('LeetCodeHub');
+    expect(app.title).toEqual('Leet-to-Git');
   });
 
   it('should render title', () => {
