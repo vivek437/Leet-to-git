@@ -1,5 +1,5 @@
 /api/*       https://leetcode.com
 /graphql/*   https://leetcode.com
-/list/*      https://leetcode.com"
+/list/*      https://leetcode.com
 /repo*       https://api.github.com
 /user*       https://api.github.com
