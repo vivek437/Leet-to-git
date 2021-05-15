@@ -1,32 +1,33 @@
 [[redirects]]
-  from = "/api"
+  from = "/api/*"
   to = "https://leetcode.com"
   status = 200
   force = true
   headers = {X-From = "Netlify"}
   
 [[redirects]]
-  from = "/graphql"
-  to = "https://leetcode.com"
-  status = 200
-  force = true
-  headers = {X-From = "Netlify"}
-[[redirects]]
-  from = "/list"
+  from = "/graphql/*"
   to = "https://leetcode.com"
   status = 200
   force = true
   headers = {X-From = "Netlify"}
   
 [[redirects]]
-  from = "/repo"
+  from = "/list/*"
+  to = "https://leetcode.com"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
+  
+[[redirects]]
+  from = "/repo*"
   to = "https://api.github.com"
   status = 200
   force = true
   headers = {X-From = "Netlify"}
   
 [[redirects]]
-  from = "/user"
+  from = "/user*"
   to = "https://api.github.com"
   status = 200
   force = true 
