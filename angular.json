@@ -44,7 +44,6 @@
             "main": "src/main.ts",
             "outputPath": "dist/Leet-To-Git",
             "polyfills": "src/polyfills.ts",
-            "proxyConfig": "src/proxy.conf.json",
             "scripts": [],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
@@ -86,11 +85,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "Leet-To-Git:build:production"
+              "browserTarget": "Leet-To-Git:build:production",
+              "proxyConfig": "src/proxy.conf.json"
             }
           },
           "options": {
-            "browserTarget": "Leet-To-Git:build"
+            "browserTarget": "Leet-To-Git:build",
+            "proxyConfig": "src/proxy.conf.json"
           }
         },
         "test": {
