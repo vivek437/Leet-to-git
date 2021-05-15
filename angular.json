@@ -44,6 +44,7 @@
             "main": "src/main.ts",
             "outputPath": "dist/Leet-To-Git",
             "polyfills": "src/polyfills.ts",
+            "proxyConfig": "src/proxy.conf.json",
             "scripts": [],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",

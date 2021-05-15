@@ -129,7 +129,7 @@ export class AppComponent implements OnInit {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
     this.httpClient
-      .request('get', 'https://leetcode.com/api/problems/algorithms/', {
+      .request('get', '/api/problems/algorithms/', {
         headers,
         withCredentials: true,
       })
@@ -298,7 +298,7 @@ export class AppComponent implements OnInit {
 
   private __GetGithubUser() {
     this.httpClient
-      .request('get', 'https://api.github.com/user', {
+      .request('get', '/user', {
         headers: this.__GetGitHubHeaders(),
       })
       .subscribe(
@@ -332,7 +332,7 @@ export class AppComponent implements OnInit {
 
   private __GetRepositories() {
     this.httpClient
-      .request('get', 'https://api.github.com/user/repos', {
+      .request('get', '/user/repos', {
         headers: this.__GetGitHubHeaders(),
       })
       .subscribe(
