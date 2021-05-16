@@ -1,9 +1,0 @@
-/api/*       https://leetcode.com:splat  200
-
-/graphql/*   https://leetcode.com:splat  200
-
-/list/*      https://leetcode.com:splat  200
-
-/repos/*       https://api.github.com:splat  200
-
-/user/*       https://api.github.com:splat  200

@@ -39,7 +39,7 @@
           },
           "options": {
             "aot": true,
-            "assets": ["src/favicon.ico", "src/assets", "src/_redirects"],
+            "assets": ["src/favicon.ico", "src/assets"],
             "index": "src/index.html",
             "main": "src/main.ts",
             "outputPath": "dist/Leet-To-Git",

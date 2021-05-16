@@ -156,7 +156,7 @@ export class AppComponent implements OnInit {
               };
               i++;
             });
-
+            console.log(response);
             this.dataSource = new MatTableDataSource(this.filteredInfo);
             this.dataSource.sort = this.sort;
             this.loading = false;
@@ -320,6 +320,7 @@ export class AppComponent implements OnInit {
             repository_public: undefined,
             repositories: [],
           };
+          console.log(x);
           this.gitUser.id = x.id;
           this.gitUser.name = x.name;
           this.gitUser.owner = x.login;
