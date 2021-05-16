@@ -242,7 +242,13 @@ export class AppComponent implements OnInit {
     dialogRef.afterClosed().subscribe(
       (result) => {
         if (result !== undefined) {
-          const url = result + '/' + slug + '.java';
+          const url =
+            result +
+            '/' +
+            this.filteredInfo[id].question_id +
+            '-' +
+            slug +
+            '.java';
           if (this.filteredInfo[id].latestSuccessfulSubmission === undefined) {
             this.__FetchSubmissionsOfProblem(slug).subscribe(
               (response: any) => {
@@ -268,7 +274,10 @@ export class AppComponent implements OnInit {
     this.httpClient
       .request('PUT', url, {
         body: {
-          message: this.filteredInfo[id].question__title,
+          message:
+            this.filteredInfo[id].question_id +
+            '-' +
+            this.filteredInfo[id].question__title,
           content: btoa(this.filteredInfo[id].latestSuccessfulSubmission),
         },
 
