@@ -11,14 +11,8 @@
   headers = {Access-Control-Allow-Origin = "*"}
 
 [[redirects]]
-  from = "/list/*"
-  to = "https://leetcode.com"
-  status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
-
-[[redirects]]
-  from = "/repo*"
-  to = "https://api.github.com"
+  from = "/repos/*"
+  to = "https://api.github.com/repos/:splat"
   status = 200
   headers = {Access-Control-Allow-Origin = "*"}
 

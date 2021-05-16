@@ -347,6 +347,7 @@ export class AppComponent implements OnInit {
       })
       .subscribe(
         (res: any) => {
+          console.log(res);
           res.forEach((element) => {
             this.gitUser.repositories.push(element.name);
           });
