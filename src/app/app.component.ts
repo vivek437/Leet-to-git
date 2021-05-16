@@ -129,7 +129,7 @@ export class AppComponent implements OnInit {
     let headers = this.defaultHeaders;
     headers = headers.set('Access-Control-Allow-Origin', '*');
     this.httpClient
-      .request('get', '/api/problems/algorithms/', {
+      .request('get', '/api/problems/algorithms', {
         headers,
         withCredentials: true,
       })

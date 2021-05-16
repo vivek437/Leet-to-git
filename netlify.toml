@@ -2,34 +2,18 @@
   from = "/api/*"
   to = "https://leetcode.com:splat"
   status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
 
 [[redirects]]
   from = "/graphql/*"
   to = "https://leetcode.com:splat"
   status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
 
 [[redirects]]
-  from = "/repos"
-  to = "https://api.github.com:splat"
+  from = "/repo*"
+  to = "https://api.github.com"
   status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
 
 [[redirects]]
-  from = "/repos/"
-  to = "https://api.github.com:splat"
+  from = "/user*"
+  to = "https://api.github.com"
   status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
-
-[[redirects]]
-  from = "/user/*"
-  to = "https://api.github.com:splat"
-  status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
-
-  [[redirects]]
-  from = "/user"
-  to = "https://api.github.com:splat"
-  status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
