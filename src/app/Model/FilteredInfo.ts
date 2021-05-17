@@ -1,5 +1,5 @@
 import { QuestionTag } from './QuestionTags';
-import { Submissions } from './Submissions';
+import { Submissions, SubmissionsDump } from './Submissions';
 export interface FilteredInfo {
   internalId: number;
   question_id: number;
@@ -9,5 +9,5 @@ export interface FilteredInfo {
   level: string;
   questionTag?: QuestionTag;
   submissions?: Submissions;
-  latestSuccessfulSubmission?: string;
+  latestSuccessfulSubmission?: SubmissionsDump;
 }

@@ -19,6 +19,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { retry, delay } from 'rxjs/operators';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { languages } from './Model/language';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -115,11 +116,14 @@ export class AppComponent implements OnInit {
       this.__FetchSubmissionsOfProblem(solvedQuestion.slug)
         .pipe(
           retry(3), // you retry 3 times
-          delay(5000), // each retry will start after 1 second,
+          delay(5000), // each retry will start after 5 second,
         )
         .subscribe(
           (response: any) => {
             this.filteredInfo[solvedQuestion.internalId].submissions = response;
+            console.log(
+              this.filteredInfo[solvedQuestion.internalId].submissions,
+            );
             this.__UpdateLatestSubmission(
               response.submissions_dump,
               solvedQuestion.internalId,
@@ -194,15 +198,18 @@ export class AppComponent implements OnInit {
   private __UpdateLatestSubmission(submissions: SubmissionsDump[], id: number) {
     submissions.forEach((item) => {
       if (item.status_display === 'Accepted') {
-        this.filteredInfo[id].latestSuccessfulSubmission = item.code;
+        this.filteredInfo[id].latestSuccessfulSubmission = item;
       }
     });
   }
 
-  private __DownloadSubmission(latestSubmission: string, slug: string) {
-    const bb = new Blob([latestSubmission], { type: 'text/plain;' });
+  private __DownloadSubmission(
+    latestSubmission: SubmissionsDump,
+    slug: string,
+  ) {
+    const bb = new Blob([latestSubmission.code], { type: 'text/plain;' });
     const a = document.createElement('a');
-    a.download = slug;
+    a.download = slug + languages[latestSubmission.lang];
     a.href = window.URL.createObjectURL(bb);
     a.click();
   }
@@ -261,12 +268,7 @@ export class AppComponent implements OnInit {
       (result) => {
         if (result !== undefined) {
           const url =
-            result +
-            '/' +
-            this.filteredInfo[id].question_id +
-            '-' +
-            slug +
-            '.java';
+            result + '/' + this.filteredInfo[id].question_id + '-' + slug;
           if (this.filteredInfo[id].latestSuccessfulSubmission === undefined) {
             this.__FetchSubmissionsOfProblem(slug).subscribe(
               (response: any) => {
@@ -289,6 +291,8 @@ export class AppComponent implements OnInit {
   }
 
   private __PushToGithub(url: string, id: number) {
+    url =
+      url + languages[this.filteredInfo[id].latestSuccessfulSubmission.lang];
     this.httpClient
       .request('PUT', url, {
         body: {
@@ -296,7 +300,7 @@ export class AppComponent implements OnInit {
             this.filteredInfo[id].question_id +
             '-' +
             this.filteredInfo[id].question__title,
-          content: btoa(this.filteredInfo[id].latestSuccessfulSubmission),
+          content: btoa(this.filteredInfo[id].latestSuccessfulSubmission.code),
         },
 
         headers: this.__GetGitHubHeaders(),
