@@ -1,6 +1,9 @@
 # Leet-To-Git
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1.
+This is an open-source project and was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1. Hosted at - https://leet-to-git.netlify.app/
+
+
+
 
 ## Development server
 
