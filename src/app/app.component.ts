@@ -20,6 +20,10 @@ import { retry, delay } from 'rxjs/operators';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { languages } from './Model/language';
+import * as JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { RestCallService } from './Services/rest-call-services';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -27,8 +31,17 @@ import { languages } from './Model/language';
 })
 export class AppComponent implements OnInit {
   title = 'LEET-TO-GIT';
-  info: Info;
-  gitUser: User;
+  allQues: Info;
+
+  gitUser: User = {
+    id: undefined,
+    name: undefined,
+    owner: undefined,
+    repository_private: undefined,
+    repository_public: undefined,
+    repositories: [],
+  };
+
   filteredInfo: FilteredInfo[] = [];
   defaultHeaders = new HttpHeaders();
   displayedColumns: string[] = [
@@ -40,6 +53,7 @@ export class AppComponent implements OnInit {
   dataSource: any;
   loading = true;
   INVALID_INFO = 'Invalid Github PAT or Invalid Leetcode Cookie';
+  jszip = new JSZip();
 
   @ViewChild(MatSort, { static: false }) sort: MatSort;
 
@@ -50,6 +64,7 @@ export class AppComponent implements OnInit {
     private snackBar: MatSnackBar,
     private matIconRegistry: MatIconRegistry,
     private domSanitizer: DomSanitizer,
+    private restCall: RestCallService,
   ) {
     this.matIconRegistry.addSvgIcon(
       'github',
@@ -72,6 +87,7 @@ export class AppComponent implements OnInit {
         width: '700px',
         data: {},
       });
+
       dialogRef.afterClosed().subscribe((result) => {
         this.__GetGithubUser();
         this.__GetLeetCodeUserProfile();
@@ -89,171 +105,96 @@ export class AppComponent implements OnInit {
     );
   }
 
-  public downloadAllSolvedSolution() {
-    const solvedQuestion = [];
+  public downloadAll() {
+    const solvedList = [];
     this.filteredInfo.forEach((item) => {
       if (item.status === 'Solved') {
-        solvedQuestion.push({
+        solvedList.push({
           internalId: item.internalId,
           slug: item.question__title_slug,
         });
       }
     });
 
-    // tslint:disable-next-line:prefer-for-of
-    for (let i = 0; i < solvedQuestion.length; i++) {
+    this.jszip = new JSZip();
+    this.__openSnackBar('Generating Zip Download will start soon');
+    for (let i = 0; i < 4; i++) {
       setTimeout(() => {
-        this.downloadSpecificSolution(solvedQuestion[i]);
+        this.downloadSubmission(solvedList[i], {
+          curr: i,
+          total: 4,
+        });
       }, (i + 1) * 3000);
     }
   }
 
-  public downloadSpecificSolution(solvedQuestion: any) {
+  public downloadSubmission(subs: any, data?: any) {
     if (
-      this.filteredInfo[solvedQuestion.internalId]
-        .latestSuccessfulSubmission === undefined
+      this.filteredInfo[subs.internalId].latestSuccessfulSubmission ===
+      undefined
     ) {
-      this.__FetchSubmissionsOfProblem(solvedQuestion.slug)
+      this.restCall
+        .__FetchSubmissions(subs.slug)
         .pipe(
           retry(3), // you retry 3 times
           delay(5000), // each retry will start after 5 second,
         )
         .subscribe(
-          (response: any) => {
-            this.filteredInfo[solvedQuestion.internalId].submissions = response;
-            console.log(
-              this.filteredInfo[solvedQuestion.internalId].submissions,
-            );
+          (res: any) => {
+            this.filteredInfo[subs.internalId].submissions = res;
             this.__UpdateLatestSubmission(
-              response.submissions_dump,
-              solvedQuestion.internalId,
+              res.submissions_dump,
+              subs.internalId,
             );
             this.__DownloadSubmission(
-              this.filteredInfo[solvedQuestion.internalId]
-                .latestSuccessfulSubmission,
-              solvedQuestion.slug,
+              this.filteredInfo[subs.internalId].latestSuccessfulSubmission,
+              subs.slug,
+              data,
             );
           },
           (err: HttpErrorResponse) => {},
         );
     } else {
       this.__DownloadSubmission(
-        this.filteredInfo[solvedQuestion.internalId].latestSuccessfulSubmission,
-        solvedQuestion.slug,
+        this.filteredInfo[subs.internalId].latestSuccessfulSubmission,
+        subs.slug,
+        data,
       );
     }
   }
 
-  private __GetLeetCodeUserProfile() {
-    let headers = this.defaultHeaders;
-    headers = headers.set('Access-Control-Allow-Origin', '*');
-    this.httpClient
-      .request('get', '/api/problems/algorithms/', {
-        headers,
-        withCredentials: true,
-      })
-      .subscribe(
-        (response: any) => {
-          if (response.user_name === '') {
-            this.__clearCookieAndRedirect(this.INVALID_INFO);
-          } else {
-            this.info = response;
-            let i = 0;
-            this.info.stat_status_pairs.forEach((item) => {
-              this.filteredInfo[i] = {
-                internalId: i,
-                question_id: item.stat.question_id,
-                question__title: item.stat.question__title,
-                question__title_slug: item.stat.question__title_slug,
-                status: item.status === 'ac' ? 'Solved' : 'Unsolved',
-                level:
-                  item.difficulty.level === 1
-                    ? 'Easy'
-                    : item.difficulty.level === 2
-                    ? 'Medium'
-                    : 'Hard',
-              };
-              i++;
-            });
-            this.dataSource = new MatTableDataSource(this.filteredInfo);
-            this.dataSource.sort = this.sort;
-            this.loading = false;
-          }
-        },
-        (err) => {
-          this.__clearCookieAndRedirect(this.INVALID_INFO);
-        },
-      );
-  }
-
-  private __FetchSubmissionsOfProblem(slug: string) {
-    let headers = this.defaultHeaders;
-    headers = headers.set('Access-Control-Allow-Origin', '*');
-    return this.httpClient.request('get', '/api/submissions/' + slug, {
-      headers,
-      withCredentials: true,
-    });
-  }
-
-  private __UpdateLatestSubmission(submissions: SubmissionsDump[], id: number) {
-    submissions.forEach((item) => {
-      if (item.status_display === 'Accepted') {
-        this.filteredInfo[id].latestSuccessfulSubmission = item;
+  private __DownloadSubmission(sub: SubmissionsDump, slug: string, data?: any) {
+    const fileName = slug + languages[sub.lang];
+    if (data !== undefined) {
+      this.jszip.file(fileName, sub.code);
+      if (data.curr + 1 === data.total) {
+        this.jszip.generateAsync({ type: 'blob' }).then((content) => {
+          saveAs(content, 'LeetCode-Solved.zip');
+        });
       }
-    });
-  }
-
-  private __DownloadSubmission(
-    latestSubmission: SubmissionsDump,
-    slug: string,
-  ) {
-    const bb = new Blob([latestSubmission.code], { type: 'text/plain;' });
-    const a = document.createElement('a');
-    a.download = slug + languages[latestSubmission.lang];
-    a.href = window.URL.createObjectURL(bb);
-    a.click();
-  }
-
-  private __FetchQuestionTag(slug: string) {
-    let headers = this.defaultHeaders;
-    headers = headers.set('Access-Control-Allow-Origin', '*');
-    const body = {
-      query: [
-        'query getQuestionDetail($titleSlug: String!) {',
-        '  question(titleSlug: $titleSlug) {',
-        '    topicTags {',
-        '        name',
-        '        slug',
-        '        translatedName',
-        '          __typename',
-        '       }',
-        '  }',
-        '}',
-      ].join('\n'),
-      variables: { titleSlug: slug },
-      operationName: 'getQuestionDetail',
-    };
-
-    return this.httpClient.request('post', '/graphql/' + slug, {
-      body,
-      headers,
-      withCredentials: true,
-    });
+    } else {
+      const bb = new Blob([sub.code], { type: 'text/plain;' });
+      const a = document.createElement('a');
+      a.download = fileName;
+      a.href = window.URL.createObjectURL(bb);
+      a.click();
+    }
   }
 
   openDialog(filteredInfo: FilteredInfo): void {
     if (filteredInfo.questionTag === undefined) {
-      this.__FetchQuestionTag(filteredInfo.question__title_slug).subscribe(
-        (x: QuestionTag) => {
+      this.restCall
+        .__FetchQuestionTag(filteredInfo.question__title_slug)
+        .subscribe((x: QuestionTag) => {
           this.filteredInfo[filteredInfo.internalId].questionTag = x;
           this._Open(filteredInfo.internalId);
-        },
-      );
+        });
     } else {
       this._Open(filteredInfo.internalId);
     }
   }
 
+  // Open Dialog For Pushing To Github
   private _Open(id: number) {
     const slug = this.filteredInfo[id].question__title_slug;
     const dialogRef = this.dialog.open(PushToGithubComponent, {
@@ -270,7 +211,7 @@ export class AppComponent implements OnInit {
           const url =
             result + '/' + this.filteredInfo[id].question_id + '-' + slug;
           if (this.filteredInfo[id].latestSuccessfulSubmission === undefined) {
-            this.__FetchSubmissionsOfProblem(slug).subscribe(
+            this.restCall.__FetchSubmissions(slug).subscribe(
               (response: any) => {
                 this.__UpdateLatestSubmission(response.submissions_dump, id);
                 this.__PushToGithub(url, id);
@@ -293,32 +234,20 @@ export class AppComponent implements OnInit {
   private __PushToGithub(url: string, id: number) {
     url =
       url + languages[this.filteredInfo[id].latestSuccessfulSubmission.lang];
-    this.httpClient
-      .request('PUT', url, {
-        body: {
-          message:
-            this.filteredInfo[id].question_id +
-            '-' +
-            this.filteredInfo[id].question__title,
-          content: btoa(this.filteredInfo[id].latestSuccessfulSubmission.code),
-        },
-
-        headers: this.__GetGitHubHeaders(),
-      })
-      .subscribe(
-        (res: any) => {
-          this.__openSnackBar('Successful Pushed to Github');
-        },
-        (err: HttpErrorResponse) => {
-          if (err.status === 401 || err.status === 403) {
-            this.__clearCookieAndRedirect(this.INVALID_INFO);
-          } else if (err.status === 422) {
-            this.__openSnackBar('Github already contains this solution!!');
-          } else {
-            this.__openSnackBar('Internal Server Error!! Try Again Later!!');
-          }
-        },
-      );
+    this.restCall.__PushToGithub(url, id, this.filteredInfo).subscribe(
+      (res: any) => {
+        this.__openSnackBar('Successful Pushed to Github');
+      },
+      (err: HttpErrorResponse) => {
+        if (err.status === 401 || err.status === 403) {
+          this.__clearCookieAndRedirect(this.INVALID_INFO);
+        } else if (err.status === 422) {
+          this.__openSnackBar('Github already contains this solution!!');
+        } else {
+          this.__openSnackBar('Internal Server Error!! Try Again Later!!');
+        }
+      },
+    );
   }
 
   private __openSnackBar(message: string) {
@@ -328,32 +257,19 @@ export class AppComponent implements OnInit {
   }
 
   private __GetGithubUser() {
-    this.httpClient
-      .request('get', '/user', {
-        headers: this.__GetGitHubHeaders(),
-      })
-      .subscribe(
-        (x: any) => {
-          this.gitUser = {
-            id: undefined,
-            name: undefined,
-            owner: undefined,
-            repository_private: undefined,
-            repository_public: undefined,
-            repositories: [],
-          };
-
-          this.gitUser.id = x.id;
-          this.gitUser.name = x.name;
-          this.gitUser.owner = x.login;
-          this.gitUser.repository_private = x.total_private_repos;
-          this.gitUser.repository_public = x.public_repos;
-          this.__GetRepositories();
-        },
-        (err) => {
-          this.__clearCookieAndRedirect(this.INVALID_INFO);
-        },
-      );
+    this.restCall.__GetGithubUser().subscribe(
+      (x: any) => {
+        this.gitUser.id = x.id;
+        this.gitUser.name = x.name;
+        this.gitUser.owner = x.login;
+        this.gitUser.repository_private = x.total_private_repos;
+        this.gitUser.repository_public = x.public_repos;
+        this.__GetGitRepositories();
+      },
+      (err) => {
+        this.__clearCookieAndRedirect(this.INVALID_INFO);
+      },
+    );
   }
 
   private __clearCookieAndRedirect(message: string) {
@@ -362,29 +278,60 @@ export class AppComponent implements OnInit {
     window.location.reload();
   }
 
-  private __GetRepositories() {
-    this.httpClient
-      .request('get', '/user/repos', {
-        headers: this.__GetGitHubHeaders(),
-      })
-      .subscribe(
-        (res: any) => {
-          res.forEach((element) => {
-            this.gitUser.repositories.push(element.name);
-          });
-        },
-        (err) => {
-          this.__clearCookieAndRedirect(this.INVALID_INFO);
-        },
-      );
+  private __GetGitRepositories() {
+    this.restCall.__GetRepositories().subscribe(
+      (res: any) => {
+        res.forEach((element) => {
+          this.gitUser.repositories.push(element.name);
+        });
+      },
+      (err) => {
+        this.__clearCookieAndRedirect(this.INVALID_INFO);
+      },
+    );
   }
 
-  private __GetGitHubHeaders(): any {
-    let headers = this.defaultHeaders;
-    const token = this.cookieService.get('git_pat');
-    headers = headers.set('Authorization', 'token ' + token);
-    headers = headers.set('Access-Control-Allow-Origin', '*');
-    return headers;
+  private __GetLeetCodeUserProfile() {
+    this.restCall.__GetLeetCodeUserProfile().subscribe(
+      (response: any) => {
+        if (response.user_name === '') {
+          this.__clearCookieAndRedirect(this.INVALID_INFO);
+        } else {
+          this.allQues = response;
+          let i = 0;
+          this.allQues.stat_status_pairs.forEach((item) => {
+            this.filteredInfo[i] = {
+              internalId: i,
+              question_id: item.stat.question_id,
+              question__title: item.stat.question__title,
+              question__title_slug: item.stat.question__title_slug,
+              status: item.status === 'ac' ? 'Solved' : 'Unsolved',
+              level:
+                item.difficulty.level === 1
+                  ? 'Easy'
+                  : item.difficulty.level === 2
+                  ? 'Medium'
+                  : 'Hard',
+            };
+            i++;
+          });
+          this.dataSource = new MatTableDataSource(this.filteredInfo);
+          this.dataSource.sort = this.sort;
+          this.loading = false;
+        }
+      },
+      (err) => {
+        this.__clearCookieAndRedirect(this.INVALID_INFO);
+      },
+    );
+  }
+
+  private __UpdateLatestSubmission(subs: SubmissionsDump[], id: number) {
+    subs.forEach((item) => {
+      if (item.status_display === 'Accepted') {
+        this.filteredInfo[id].latestSuccessfulSubmission = item;
+      }
+    });
   }
 
   applyFilter(event: Event) {

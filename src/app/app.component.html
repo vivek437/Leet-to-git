@@ -3,30 +3,32 @@
   <h2>LEET-TO-GIT</h2>
   <mat-icon svgIcon="github"></mat-icon>
   <p class="spacer"></p>
-  <button mat-button *ngIf="info" [matMenuTriggerFor]="leetcode">
+  <button mat-button *ngIf="allQues" [matMenuTriggerFor]="leetcode">
     <mat-icon svgIcon="leetcode"></mat-icon>
     Profile
   </button>
-  <button mat-button *ngIf="info" [matMenuTriggerFor]="Github">
+  <button mat-button *ngIf="allQues" [matMenuTriggerFor]="Github">
     <mat-icon svgIcon="github"></mat-icon>
     Profile
   </button>
   <mat-menu #Github="matMenu">
-    <button *ngIf="info" mat-menu-item>{{ gitUser.owner }}</button>
-    <button *ngIf="info" mat-menu-item>Id : {{ gitUser.id }}</button>
-    <button *ngIf="info" mat-menu-item>Name : {{ gitUser.name }}</button>
-    <button *ngIf="info" mat-menu-item>
+    <button *ngIf="allQues" mat-menu-item>{{ gitUser.owner }}</button>
+    <button *ngIf="allQues" mat-menu-item>Id : {{ gitUser.id }}</button>
+    <button *ngIf="allQues" mat-menu-item>Name : {{ gitUser.name }}</button>
+    <button *ngIf="allQues" mat-menu-item>
       Public Repo : {{ gitUser.repository_public }}
     </button>
-    <button *ngIf="info" mat-menu-item>
+    <button *ngIf="allQues" mat-menu-item>
       Private Repo : {{ gitUser.repository_private }}
     </button>
   </mat-menu>
   <mat-menu #leetcode="matMenu">
-    <button *ngIf="info" mat-menu-item>{{ info.user_name }}</button>
-    <button *ngIf="info" mat-menu-item>EASY : {{ info.ac_easy }}</button>
-    <button *ngIf="info" mat-menu-item>MEDIUM : {{ info.ac_medium }}</button>
-    <button *ngIf="info" mat-menu-item>HARD : {{ info.ac_hard }}</button>
+    <button *ngIf="allQues" mat-menu-item>{{ allQues.user_name }}</button>
+    <button *ngIf="allQues" mat-menu-item>EASY : {{ allQues.ac_easy }}</button>
+    <button *ngIf="allQues" mat-menu-item>
+      MEDIUM : {{ allQues.ac_medium }}
+    </button>
+    <button *ngIf="allQues" mat-menu-item>HARD : {{ allQues.ac_hard }}</button>
   </mat-menu>
 </mat-toolbar>
 
@@ -35,7 +37,7 @@
     mat-raised-button
     style="float: right; margin: 10px 135px 10px"
     color="accent"
-    (click)="downloadAllSolvedSolution()"
+    (click)="downloadAll()"
   >
     Download All Solved
   </button>
@@ -90,10 +92,13 @@
           matTooltip="Download Solution as file"
           style="float: right; margin: 5px; color: '#81C784'"
           (click)="
-            downloadSpecificSolution({
-              internalId: element.internalId,
-              slug: element.question__title_slug
-            })
+            downloadSubmission(
+              {
+                internalId: element.internalId,
+                slug: element.question__title_slug
+              },
+              undefined
+            )
           "
         >
           <mat-icon>file_download</mat-icon>

@@ -23,6 +23,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { SetupComponent } from './setup-component/setup-component.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { RestCallService } from './Services/rest-call-services';
 @NgModule({
   declarations: [AppComponent, PushToGithubComponent, SetupComponent],
   imports: [
@@ -48,7 +49,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatProgressSpinnerModule,
     MatSnackBarModule,
   ],
-  providers: [],
+  providers: [RestCallService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
