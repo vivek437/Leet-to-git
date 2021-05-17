@@ -1,8 +1,8 @@
 # Leet-To-Git
 
-This is an open-source project and was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1. Hosted at - https://leet-to-git.netlify.app/
+This is an open-source project and was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1. Hosted at - https://leet-to-git.netlify.app/.
 
-
+This Project helps you push to your code to github repository when you have successfully solved a Leetcode problem. There's no way of accessing your solved leetcode problems in one place! Also pushing solved code one by one manually to GitHub from Leetcode is very time consuming.
 
 
 ## Development server
