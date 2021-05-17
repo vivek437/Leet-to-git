@@ -1,11 +1,15 @@
-<mat-toolbar color="warn">
-  <p>LEET-TO-GIT</p>
+<mat-toolbar>
+  <mat-icon svgIcon="leetcode"></mat-icon>
+  <h2>LEET-TO-GIT</h2>
+  <mat-icon svgIcon="github"></mat-icon>
   <p class="spacer"></p>
   <button mat-button *ngIf="info" [matMenuTriggerFor]="leetcode">
-    Leetcode Profile
+    <mat-icon svgIcon="leetcode"></mat-icon>
+    Profile
   </button>
   <button mat-button *ngIf="info" [matMenuTriggerFor]="Github">
-    Github Profile
+    <mat-icon svgIcon="github"></mat-icon>
+    Profile
   </button>
   <mat-menu #Github="matMenu">
     <button *ngIf="info" mat-menu-item>{{ gitUser.owner }}</button>
@@ -101,7 +105,7 @@
           style="float: right; margin: 5px; color: '#81D4FA'"
           (click)="openDialog(element)"
         >
-          <mat-icon>cloud_upload</mat-icon>
+          <mat-icon svgIcon="github"></mat-icon>
         </button>
       </td>
     </ng-container>

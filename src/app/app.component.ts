@@ -17,6 +17,8 @@ import { User } from './Model/User';
 import { SetupComponent } from './setup-component/setup-component.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { retry, delay } from 'rxjs/operators';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -45,7 +47,20 @@ export class AppComponent implements OnInit {
     private cookieService: CookieService,
     public dialog: MatDialog,
     private snackBar: MatSnackBar,
-  ) {}
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer,
+  ) {
+    this.matIconRegistry.addSvgIcon(
+      'github',
+      this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/gitlogo.svg'),
+    );
+    this.matIconRegistry.addSvgIcon(
+      'leetcode',
+      this.domSanitizer.bypassSecurityTrustResourceUrl(
+        '../assets/leetcode-logo.svg',
+      ),
+    );
+  }
 
   ngOnInit() {
     const session = this.cookieService.get('LEETCODE_SESSION');
@@ -332,7 +347,7 @@ export class AppComponent implements OnInit {
           this.__GetRepositories();
         },
         (err) => {
-          this.__clearCookieAndRedirect('message');
+          this.__clearCookieAndRedirect(this.INVALID_INFO);
         },
       );
   }

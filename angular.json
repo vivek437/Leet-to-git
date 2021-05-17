@@ -39,7 +39,7 @@
           },
           "options": {
             "aot": true,
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/assets"],
             "index": "src/index.html",
             "main": "src/main.ts",
             "outputPath": "dist/Leet-To-Git",
@@ -97,7 +97,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/assets"],
             "karmaConfig": "karma.conf.js",
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
