@@ -236,7 +236,11 @@ export class AppComponent implements OnInit {
     const slug = this.filteredInfo[id].question__title_slug;
     const dialogRef = this.dialog.open(PushToGithubComponent, {
       width: '400px',
-      data: { tags: this.filteredInfo[id].questionTag, user: this.gitUser },
+      data: {
+        tags: this.filteredInfo[id].questionTag,
+        user: this.gitUser,
+        slug: this.filteredInfo[id].question__title_slug,
+      },
     });
     dialogRef.afterClosed().subscribe(
       (result) => {
