@@ -20,10 +20,12 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { SetupComponent } from './setup-component/setup-component.component';
+import { SetupComponent } from './Dialog/setup-Dialog/setup-dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RestCallService } from './Services/rest-call-services';
+import { MatChipsModule } from '@angular/material/chips';
+import { FlexLayoutModule } from '@angular/flex-layout';
 @NgModule({
   declarations: [AppComponent, PushToGithubComponent, SetupComponent],
   imports: [
@@ -48,6 +50,8 @@ import { RestCallService } from './Services/rest-call-services';
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatChipsModule,
+    FlexLayoutModule,
   ],
   providers: [RestCallService],
   bootstrap: [AppComponent],

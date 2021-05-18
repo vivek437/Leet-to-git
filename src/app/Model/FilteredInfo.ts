@@ -1,4 +1,3 @@
-import { QuestionTag } from './QuestionTags';
 import { Submissions, SubmissionsDump } from './Submissions';
 export interface FilteredInfo {
   internalId: number;
@@ -7,7 +6,7 @@ export interface FilteredInfo {
   question__title_slug: string;
   status?: string;
   level: string;
-  questionTag?: QuestionTag;
   submissions?: Submissions;
   latestSuccessfulSubmission?: SubmissionsDump;
+  tags: string[];
 }

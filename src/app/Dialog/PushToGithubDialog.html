@@ -1,49 +1,57 @@
-<h3 mat-dialog-title>PUSH TO GITHUB</h3>
-<mat-divider></mat-divider>
-<div style="padding: 10px">
-  <h4 mat-dialog-title>Select Question Bucket*</h4>
-  <h4 mat-dialog-title>Recommended Tags:</h4>
-  <mat-radio-group
-    aria-labelledby="radio-group-label"
-    class="radioGroup"
-    [(ngModel)]="selectedBucket"
-  >
-    <mat-radio-button
-      class="radio-button"
-      *ngFor="let tag of data.tags.data.question.topicTags"
-      [value]="tag.name"
-    >
-      {{tag.name}}
-    </mat-radio-button>
-  </mat-radio-group>
+<h3 mat-dialog-title>
+  <button mat-icon-button><mat-icon svgIcon="github"></mat-icon></button>
 
-  <mat-form-field>
-    <p>Custom Question Bucket</p>
-    <input matInput [(ngModel)]="selectedBucket" />
-  </mat-form-field>
-</div>
-<mat-divider></mat-divider>
+  PUSH TO GITHUB
+  <p>{{data.id }} - {{data.slug | titlecase}}</p>
+</h3>
 
-<div style="padding: 10px">
-  <h4 mat-dialog-title>Select Github Repository*</h4>
-  <mat-radio-group
-    aria-labelledby="radio-group-label"
-    class="radioGroup"
-    [(ngModel)]="selectedRepo"
-  >
-    <mat-radio-button
-      class="radio-button"
-      *ngFor="let repo of data.user.repositories"
-      [value]="repo"
+<mat-divider></mat-divider>
+<div fxLayout="row" fxLayoutAlign="space-around center">
+  <div style="padding: 10px">
+    <h4 mat-dialog-title>Select Github Repository*</h4>
+    <mat-radio-group
+      aria-labelledby="radio-group-label"
+      class="radioGroup"
+      [(ngModel)]="selectedRepo"
     >
-      {{ repo }}
-    </mat-radio-button>
-  </mat-radio-group>
+      <mat-radio-button
+        class="radio-button"
+        *ngFor="let repo of data.user.repositories"
+        [value]="repo"
+      >
+        {{ repo }}
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
+  <mat-divider [vertical]="true" style="height: 300px"></mat-divider>
+  <div style="padding: 10px">
+    <h4 mat-dialog-title>Select Question Bucket*</h4>
+    <h4 mat-dialog-title>Recommended Tags:</h4>
+    <mat-radio-group
+      aria-labelledby="radio-group-label"
+      class="radioGroup"
+      [(ngModel)]="selectedBucket"
+    >
+      <mat-radio-button
+        class="radio-button"
+        *ngFor="let tag of data.tags"
+        [value]="tag"
+      >
+        {{tag}}
+      </mat-radio-button>
+    </mat-radio-group>
+
+    <mat-form-field>
+      <p>Custom Question Bucket</p>
+      <input matInput [(ngModel)]="selectedBucket" />
+    </mat-form-field>
+  </div>
+  <mat-divider></mat-divider>
 </div>
 <mat-divider></mat-divider>
 <br />
 <p></p>
-<p>GitHub : /{{selectedRepo}}/{{selectedBucket}}/{{data.slug}}</p>
+<p>GitHub : /{{selectedRepo}}/{{selectedBucket}}</p>
 
 <div mat-dialog-actions>
   <button mat-raised-button cdkFocusInitial color="warn" (click)="onClose()">

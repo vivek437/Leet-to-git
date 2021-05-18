@@ -4,9 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 
 @Component({
-  selector: 'app-setup-component',
-  templateUrl: './setup-component.component.html',
-  styleUrls: ['./setup-component.component.scss'],
+  selector: 'app-setup-dialog',
+  templateUrl: './setup-dialog.html',
+  styleUrls: ['./setup-dialog.scss'],
 })
 export class SetupComponent implements OnInit {
   constructor(

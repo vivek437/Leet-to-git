@@ -10,11 +10,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { FilteredInfo } from './Model/FilteredInfo';
 import { SubmissionsDump } from './Model/Submissions';
-import { QuestionTag } from './Model/QuestionTags';
 import { MatDialog } from '@angular/material/dialog';
 import { PushToGithubComponent } from './Dialog/PushToGithubDialog';
 import { User } from './Model/User';
-import { SetupComponent } from './setup-component/setup-component.component';
+import { SetupComponent } from './Dialog/setup-Dialog/setup-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { retry, delay } from 'rxjs/operators';
 import { MatIconRegistry } from '@angular/material/icon';
@@ -23,6 +22,7 @@ import { languages } from './Model/language';
 import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { RestCallService } from './Services/rest-call-services';
+import { Tags } from './Model/TopicMap';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +32,7 @@ import { RestCallService } from './Services/rest-call-services';
 export class AppComponent implements OnInit {
   title = 'LEET-TO-GIT';
   allQues: Info;
-
+  globalIdMap = new Map();
   gitUser: User = {
     id: undefined,
     name: undefined,
@@ -41,6 +41,7 @@ export class AppComponent implements OnInit {
     repository_public: undefined,
     repositories: [],
   };
+  topic: Tags;
 
   filteredInfo: FilteredInfo[] = [];
   defaultHeaders = new HttpHeaders();
@@ -89,12 +90,12 @@ export class AppComponent implements OnInit {
       });
 
       dialogRef.afterClosed().subscribe((result) => {
-        this.__GetGithubUser();
-        this.__GetLeetCodeUserProfile();
+        this._GetLeetCodeUserProfile();
+        this._GetGithubUser();
       });
     } else {
-      this.__GetGithubUser();
-      this.__GetLeetCodeUserProfile();
+      this._GetLeetCodeUserProfile();
+      this._GetGithubUser();
     }
   }
 
@@ -182,27 +183,19 @@ export class AppComponent implements OnInit {
   }
 
   openDialog(filteredInfo: FilteredInfo): void {
-    if (filteredInfo.questionTag === undefined) {
-      this.restCall
-        .__FetchQuestionTag(filteredInfo.question__title_slug)
-        .subscribe((x: QuestionTag) => {
-          this.filteredInfo[filteredInfo.internalId].questionTag = x;
-          this._Open(filteredInfo.internalId);
-        });
-    } else {
-      this._Open(filteredInfo.internalId);
-    }
+    this._Open(filteredInfo.internalId);
   }
 
   // Open Dialog For Pushing To Github
   private _Open(id: number) {
     const slug = this.filteredInfo[id].question__title_slug;
     const dialogRef = this.dialog.open(PushToGithubComponent, {
-      width: '400px',
+      width: '600px',
       data: {
-        tags: this.filteredInfo[id].questionTag,
+        tags: this.filteredInfo[id].tags,
         user: this.gitUser,
         slug: this.filteredInfo[id].question__title_slug,
+        id: this.filteredInfo[id].question_id,
       },
     });
     dialogRef.afterClosed().subscribe(
@@ -256,7 +249,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private __GetGithubUser() {
+  private _GetGithubUser() {
     this.restCall.__GetGithubUser().subscribe(
       (x: any) => {
         this.gitUser.id = x.id;
@@ -264,12 +257,27 @@ export class AppComponent implements OnInit {
         this.gitUser.owner = x.login;
         this.gitUser.repository_private = x.total_private_repos;
         this.gitUser.repository_public = x.public_repos;
-        this.__GetGitRepositories();
+        this._GetGitRepositories();
       },
       (err) => {
         this.__clearCookieAndRedirect(this.INVALID_INFO);
       },
     );
+  }
+
+  private _GetLeetCodeQuestionTags() {
+    this.restCall.__GetLeetCodeQuestionTags().subscribe((res: any) => {
+      this.topic = res;
+      this.topic.topics.forEach((item) => {
+        item.questions.forEach((ele) => {
+          const internalId = this.globalIdMap.get(ele);
+          if (internalId !== undefined) {
+            this.filteredInfo[internalId].tags.push(item.name);
+          }
+        });
+      });
+      this.loading = false;
+    });
   }
 
   private __clearCookieAndRedirect(message: string) {
@@ -278,7 +286,7 @@ export class AppComponent implements OnInit {
     window.location.reload();
   }
 
-  private __GetGitRepositories() {
+  private _GetGitRepositories() {
     this.restCall.__GetRepositories().subscribe(
       (res: any) => {
         res.forEach((element) => {
@@ -291,7 +299,7 @@ export class AppComponent implements OnInit {
     );
   }
 
-  private __GetLeetCodeUserProfile() {
+  private _GetLeetCodeUserProfile() {
     this.restCall.__GetLeetCodeUserProfile().subscribe(
       (response: any) => {
         if (response.user_name === '') {
@@ -300,9 +308,11 @@ export class AppComponent implements OnInit {
           this.allQues = response;
           let i = 0;
           this.allQues.stat_status_pairs.forEach((item) => {
+            this.globalIdMap.set(item.stat.question_id, i);
             this.filteredInfo[i] = {
               internalId: i,
-              question_id: item.stat.question_id,
+              question_id:
+                item.stat.frontend_question_id || item.stat.question_id,
               question__title: item.stat.question__title,
               question__title_slug: item.stat.question__title_slug,
               status: item.status === 'ac' ? 'Solved' : 'Unsolved',
@@ -312,12 +322,14 @@ export class AppComponent implements OnInit {
                   : item.difficulty.level === 2
                   ? 'Medium'
                   : 'Hard',
+              tags: [],
             };
             i++;
           });
+          this._GetLeetCodeQuestionTags();
           this.dataSource = new MatTableDataSource(this.filteredInfo);
+          this.sort.disableClear = true;
           this.dataSource.sort = this.sort;
-          this.loading = false;
         }
       },
       (err) => {
@@ -337,5 +349,9 @@ export class AppComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  getClass(i: number) {
+    return 'tag-' + (i % 3);
   }
 }

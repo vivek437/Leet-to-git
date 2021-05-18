@@ -6,6 +6,13 @@
   headers = {Access-Control-Allow-Origin = "*"}
 
 [[redirects]]
+  from = "/problems/api/tags/"
+  to = "https://leetcode.com/problems/api/tags/"
+  status = 200
+  force = true
+  headers = {Access-Control-Allow-Origin = "*"}
+
+[[redirects]]
   from = "/api/submissions/*"
   to = "https://leetcode.com/api/submissions/:splat"
   status = 200

@@ -30,6 +30,15 @@ export class RestCallService {
     });
   }
 
+  public __GetLeetCodeQuestionTags() {
+    let headers = this.defaultHeaders;
+    headers = headers.set('Access-Control-Allow-Origin', '*');
+    return this.httpClient.request('get', '/problems/api/tags/', {
+      headers,
+      withCredentials: true,
+    });
+  }
+
   public __GetRepositories() {
     return this.httpClient.request('get', '/user/repos', {
       headers: this.__GetGitHubHeaders(),
@@ -62,30 +71,30 @@ export class RestCallService {
     });
   }
 
-  public __FetchQuestionTag(slug: string) {
-    let headers = this.defaultHeaders;
-    headers = headers.set('Access-Control-Allow-Origin', '*');
-    const body = {
-      query: [
-        'query getQuestionDetail($titleSlug: String!) {',
-        '  question(titleSlug: $titleSlug) {',
-        '    topicTags {',
-        '        name',
-        '        slug',
-        '        translatedName',
-        '          __typename',
-        '       }',
-        '  }',
-        '}',
-      ].join('\n'),
-      variables: { titleSlug: slug },
-      operationName: 'getQuestionDetail',
-    };
+  // public __FetchQuestionTag(slug: string) {
+  //   let headers = this.defaultHeaders;
+  //   headers = headers.set('Access-Control-Allow-Origin', '*');
+  //   const body = {
+  //     query: [
+  //       'query getQuestionDetail($titleSlug: String!) {',
+  //       '  question(titleSlug: $titleSlug) {',
+  //       '    topicTags {',
+  //       '        name',
+  //       '        slug',
+  //       '        translatedName',
+  //       '          __typename',
+  //       '       }',
+  //       '  }',
+  //       '}',
+  //     ].join('\n'),
+  //     variables: { titleSlug: slug },
+  //     operationName: 'getQuestionDetail',
+  //   };
 
-    return this.httpClient.request('post', '/graphql/' + slug, {
-      body,
-      headers,
-      withCredentials: true,
-    });
-  }
+  //   return this.httpClient.request('post', '/graphql/' + slug, {
+  //     body,
+  //     headers,
+  //     withCredentials: true,
+  //   });
+  // }
 }

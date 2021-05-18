@@ -36,3 +36,29 @@ th {
   opacity: 0.54 !important;
   transform: translateY(0px) !important;
 }
+
+mat-chip {
+  height: 20px;
+}
+
+.tag {
+  float: right;
+  padding-right: 10px;
+}
+
+.tag-0 {
+  background-color: #7cb342;
+  color: white;
+}
+.tag-1 {
+  background-color: #f3bf74;
+  color: white;
+}
+.tag-2 {
+  background-color: #f4511e;
+  color: white;
+}
+
+.filter-table {
+  margin: 10px 40px 10px 40px;
+}

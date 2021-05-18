@@ -35,6 +35,7 @@
 <div>
   <button
     mat-raised-button
+    *ngIf="!loading"
     style="float: right; margin: 10px 135px 10px"
     color="accent"
     (click)="downloadAll()"
@@ -42,7 +43,7 @@
     Download All Solved
   </button>
 
-  <mat-form-field style="margin: 10px 40px 10px 40px">
+  <mat-form-field class="filter-table">
     <mat-label>Filter</mat-label>
     <input
       matInput
@@ -60,18 +61,23 @@
 
     <ng-container matColumnDef="question__title">
       <th mat-header-cell *matHeaderCellDef mat-sort-header><u>Title</u></th>
-      <td
-        style="cursor: pointer; color: #2196f3"
-        mat-cell
-        *matCellDef="let element"
-        (click)="redirectToLeetCode(element)"
-      >
-        <u> {{ element.question__title }}</u>
+      <td style="cursor: pointer" mat-cell *matCellDef="let element">
+        <u style="color: #2196f3" (click)="redirectToLeetCode(element)">
+          {{ element.question__title }}</u
+        >
+        <mat-chip-list class="tag">
+          <mat-chip
+            *ngFor="let item of element.tags; let i = index"
+            [ngClass]="getClass(i)"
+          >
+            {{ item }}
+          </mat-chip>
+        </mat-chip-list>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="level">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header><u>Level</u></th>
+      <th mat-header-cell *matHeaderCellDef><u>Level</u></th>
       <td mat-cell [ngClass]="element.level" *matCellDef="let element">
         {{ element.level }}
       </td>
@@ -124,10 +130,11 @@
       </td>
     </tr>
   </table>
+  <div style="padding: 20px"></div>
 </div>
 <div *ngIf="loading">
   <mat-spinner
-    style="margin: 0 auto; margin-top: 300px"
+    style="margin: 0 auto; margin-top: 250px"
     mode="indeterminate"
   ></mat-spinner>
 </div>

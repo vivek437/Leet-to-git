@@ -17,6 +17,12 @@
     "secure": true,
     "target": "https://leetcode.com"
   },
+  "/problems/api/*": {
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "secure": true,
+    "target": "https://leetcode.com"
+  },
   "/repo": {
     "changeOrigin": true,
     "logLevel": "debug",
